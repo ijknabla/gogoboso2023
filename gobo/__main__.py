@@ -4,6 +4,7 @@ from functools import wraps
 from typing import Any, ParamSpec, TypeVar
 
 import click
+from openpyxl import Workbook
 
 P = ParamSpec("P")
 T = TypeVar("T")
@@ -23,9 +24,13 @@ def main() -> None:
 
 
 @main.command
+@click.argument("output", type=click.Path(dir_okay=False))
 @run_decorator
-async def excel() -> None:
-    ...
+async def excel(
+    output: str,
+) -> None:
+    wb = Workbook()
+    wb.save(output)
 
 
 if __name__ == "__main__":
