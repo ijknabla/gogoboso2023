@@ -5,6 +5,8 @@ from typing import Any, ParamSpec, TypeVar
 
 import click
 
+from . import municipality
+
 P = ParamSpec("P")
 T = TypeVar("T")
 
@@ -25,7 +27,7 @@ def main() -> None:
 @main.command
 @run_decorator
 async def 市町村() -> None:
-    ...
+    await municipality.get_rows()
 
 
 if __name__ == "__main__":
