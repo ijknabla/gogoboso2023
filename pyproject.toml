@@ -18,6 +18,10 @@ mypy = "^1.5.1"
 pyproject-flake8 = "^6.0.0.post1"
 types-openpyxl = "^3.1.0.17"
 
+
+[tool.poetry.group.bootstrap.dependencies]
+aiohttp = "^3.8.5"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
