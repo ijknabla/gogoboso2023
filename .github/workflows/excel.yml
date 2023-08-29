@@ -25,9 +25,10 @@ jobs:
           pip install --requirement requirements.txt
       - name: Make html
         run: |
-          python -m gobo excel GoGo房総.xlsx
+          mkdir build
+          python -m gobo excel build/GoGo房総.xlsx
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
           # Upload entire repository
-          path: "GoGo房総.xlsx"
+          path: build
