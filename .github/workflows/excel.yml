@@ -1,0 +1,29 @@
+# Simple workflow for deploying static content to GitHub Pages
+name: Deploy Excel sheet
+
+on:
+  # Runs on pushes targeting the master, develop branch
+  push:
+    branches: [ master, develop ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: |
+          pip install requirements.txt
+      - name: Make html
+        run: |
+          python -m gobo excel GoGo房総.xlsx
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          # Upload entire repository
+          path: "GoGo房総.xlsx"
