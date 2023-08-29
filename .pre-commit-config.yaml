@@ -47,3 +47,15 @@ repos:
         -   .
         language: system
         pass_filenames: false
+    -   id: poetry-export-requirements
+        name: Export requirements.txt
+        entry: poetry
+        args:
+        -   export
+        -   --format=requirements.txt
+        -   --without-hashes
+        -   --only=main
+        -   --output=requirements.txt
+        language: system
+        pass_filenames: false
+        files: ^(poetry\.lock|\.pre-commit-config\.yaml)$
