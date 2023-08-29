@@ -27,7 +27,9 @@ def main() -> None:
 @main.command
 @run_decorator
 async def 市町村() -> None:
-    await municipality.get_rows()
+    async for id, parent_id, (kanji, kana) in municipality.get_rows():
+        parent = "NULL" if parent_id is None else parent_id
+        print(f"    ({id:>5}, {parent:>5}, {kanji!r:　<7}, {kana!r:　<11})")
 
 
 if __name__ == "__main__":

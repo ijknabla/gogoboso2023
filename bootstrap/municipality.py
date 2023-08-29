@@ -1,4 +1,4 @@
-from collections.abc import Generator, Iterator
+from collections.abc import AsyncGenerator, Generator, Iterator
 from contextlib import AsyncExitStack
 
 from aiohttp import ClientSession
@@ -8,7 +8,9 @@ from lxml.etree import _Element
 URI = "http://www.tt.rim.or.jp/~ishato/tiri/code/rireki/12tiba.htm"
 
 
-async def get_rows(uri: str = URI) -> None:
+async def get_rows(
+    uri: str = URI,
+) -> AsyncGenerator[tuple[int, int | None, tuple[str, str]], None]:
     async with AsyncExitStack() as stack:
         enter = stack.enter_async_context
         session = await enter(ClientSession())
@@ -16,12 +18,19 @@ async def get_rows(uri: str = URI) -> None:
         document = html.fromstring(await response.text(encoding="cp932"))
         table: _Element
         (table,) = document.xpath("//table")  # type: ignore
-        print(list(flatten(table)))
+
+        rows = list(flatten(table))
+        parents = {child: code for code, _, child in rows}
+        for code, parent, child in rows:
+            if parent is None:
+                yield code2int(code), None, child
+            else:
+                yield code2int(code), code2int(parents[parent]), child
 
 
 def flatten(
     table: _Element,
-) -> Generator[tuple[tuple[int, int], tuple[str, str], tuple[str, str] | None], None, None]:
+) -> Generator[tuple[tuple[int, int], tuple[str, str] | None, tuple[str, str]], None, None]:
     tr_iterator: Iterator[_Element]
     tr_iterator = iter(table.xpath("tr"))  # type: ignore
     for tr in tr_iterator:
@@ -45,9 +54,13 @@ def flatten(
         if tr.xpath("td[@colspan=2]"):
             kanji, kana = tr.xpath("td[position() = 4 or position() = 6]/text()")  # type: ignore
             parent = kanji, kana
-            yield code, parent, None
+            yield code, None, parent
         else:
             position = f"position() = {4 - shift} or position() = {5 - shift}"
             kanji, kana = tr.xpath(f"td[{position}]/text()")  # type: ignore
             child = kanji, kana
             yield code, parent, child
+
+
+def code2int(code: tuple[int, int]) -> int:
+    return code[0] * 1000 + code[1]
