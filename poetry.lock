@@ -282,6 +282,17 @@ files = [
 ]
 
 [[package]]
+name = "types-openpyxl"
+version = "3.1.0.17"
+description = "Typing stubs for openpyxl"
+optional = false
+python-versions = "*"
+files = [
+    {file = "types-openpyxl-3.1.0.17.tar.gz", hash = "sha256:f16c5118cab7dbfc846ff1a293cc9d4d611d4d6f6bbf277929b46e6ad018c430"},
+    {file = "types_openpyxl-3.1.0.17-py3-none-any.whl", hash = "sha256:880b897a8b9ec1b7497d4b7646d34ae40d444bdcb2530a9d9159d763c0457f1e"},
+]
+
+[[package]]
 name = "typing-extensions"
 version = "4.7.1"
 description = "Backported and Experimental Type Hints for Python 3.7+"
@@ -295,4 +306,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "e4d307fd6f602fa16cf5d93e3166c90b494a3ee4d74dc730ca20dd89a0cd9525"
+content-hash = "0bde08eb5824f82b389e10a275cdbd6618ff79234c1964eef7a64174781525ba"
