@@ -17,9 +17,14 @@ def run_decorator(f: Callable[P, Coroutine[Any, Any, T]]) -> Callable[P, T]:
     return wrapped
 
 
-@click.command
+@click.group
+def main() -> None:
+    ...
+
+
+@main.command
 @run_decorator
-async def main() -> None:
+async def excel() -> None:
     ...
 
 
