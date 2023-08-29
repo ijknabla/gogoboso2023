@@ -17,6 +17,7 @@ isort = "^5.12.0"
 mypy = "^1.5.1"
 pyproject-flake8 = "^6.0.0.post1"
 types-openpyxl = "^3.1.0.17"
+lxml-stubs = "^0.4.0"
 
 
 [tool.poetry.group.bootstrap.dependencies]
