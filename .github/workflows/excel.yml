@@ -27,7 +27,7 @@ jobs:
       - name: Make Excel sheet
         run: |
           mkdir build
-          poetry run python -m gobo excel build/GoGo房総.xlsx
+          poetry run gobo excel build/GoGo房総.xlsx
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:

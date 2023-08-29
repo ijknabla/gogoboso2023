@@ -5,6 +5,9 @@ description = ""
 authors = ["ijknabla <ijknabla@gmail.com>"]
 readme = "README.md"
 
+[tool.poetry.scripts]
+gobo = "gobo.__main__:main"
+
 [tool.poetry.build]
 script = "build.py"
 generate-setup-file = false
