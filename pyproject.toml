@@ -5,6 +5,10 @@ description = ""
 authors = ["ijknabla <ijknabla@gmail.com>"]
 readme = "README.md"
 
+[tool.poetry.build]
+script = "build.py"
+generate-setup-file = false
+
 [tool.poetry.dependencies]
 python = "^3.10"
 click = "^8.1.7"
