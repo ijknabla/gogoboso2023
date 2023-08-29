@@ -42,7 +42,7 @@ CREATE TABLE municipality_names
 
 INSERT INTO municipality_names
 (
-        id, kanji       , kana
+        id, kanji, kana
 )
 VALUES
         """.strip(),
@@ -50,7 +50,7 @@ VALUES
     )
 
     print(
-        *(f"    ({id:>5}, {kanji!r:　<7}, {kana!r:　<11})" for id, _, (kanji, kana) in rows),
+        *(f"    ({id:>5}, {kanji!r}, {kana!r})" for id, _, (kanji, kana) in rows),
         sep=",\n",
         end=";\n",
         file=output,
