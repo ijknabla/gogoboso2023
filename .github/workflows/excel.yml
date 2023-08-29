@@ -21,7 +21,7 @@ jobs:
           python-version: "3.10"
       - name: Install dependencies
         run: |
-          pip install requirements.txt
+          pip install --requirement requirements.txt
       - name: Make html
         run: |
           python -m gobo excel GoGo房総.xlsx
