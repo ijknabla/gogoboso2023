@@ -23,13 +23,13 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install --requirement requirements.txt
-      - name: Make html
+      - name: Make Excel sheet
         run: |
           mkdir build
           python -m gobo excel build/GoGo房総.xlsx
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          # Upload entire repository
+          # Upload Excel sheet
           name: excel-sheet
           path: build/GoGo房総.xlsx
