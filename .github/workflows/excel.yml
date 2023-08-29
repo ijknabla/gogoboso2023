@@ -28,7 +28,8 @@ jobs:
           mkdir build
           python -m gobo excel build/GoGo房総.xlsx
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           # Upload entire repository
-          path: build
+          name: excel-sheet
+          path: build/GoGo房総.xlsx
