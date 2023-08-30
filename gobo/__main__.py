@@ -47,6 +47,8 @@ async def excel(
             )
         )
 
+    municipality_sheet.auto_filter.ref = municipality_sheet.dimensions
+
     wb.save(output)
 
 
