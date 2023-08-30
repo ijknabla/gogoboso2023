@@ -31,6 +31,9 @@ async def get_rows(
 def flatten(
     table: _Element,
 ) -> Generator[tuple[tuple[int, int], tuple[str, str] | None, tuple[str, str]], None, None]:
+    pref = ("千葉県", "ちばけん")
+    yield (12, 000), None, pref
+
     tr_iterator: Iterator[_Element]
     tr_iterator = iter(table.xpath("tr"))  # type: ignore
     for tr in tr_iterator:
@@ -54,7 +57,7 @@ def flatten(
         if tr.xpath("td[@colspan=2]"):
             kanji, kana = tr.xpath("td[position() = 4 or position() = 6]/text()")  # type: ignore
             parent = kanji, kana
-            yield code, None, parent
+            yield code, pref, parent
         else:
             position = f"position() = {4 - shift} or position() = {5 - shift}"
             kanji, kana = tr.xpath(f"td[{position}]/text()")  # type: ignore
