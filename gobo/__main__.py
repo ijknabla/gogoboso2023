@@ -47,7 +47,7 @@ async def excel(
 
     spot_sheet.auto_filter.ref = spot_sheet.dimensions
 
-    municipality_sheet = wb.create_sheet("市町村")
+    municipality_sheet = wb.create_sheet("市町村データベース")
 
     municipality_sheet["A1"] = "ID"
     municipality_sheet["B1"] = "名前"
