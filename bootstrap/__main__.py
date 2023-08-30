@@ -6,6 +6,8 @@ from typing import IO, Any, ParamSpec, TypeVar
 
 import click
 
+from gobo.types import Notation
+
 from . import municipality
 
 P = ParamSpec("P")
@@ -25,24 +27,25 @@ def main() -> None:
     ...
 
 
-@main.command
-@click.option("-o", "--output", type=click.File("a", encoding="utf-8"), default=sys.stdout)
+@main.command(name="municipality")
+@click.option("-o", "--output", type=click.File("w", encoding="utf-8"), default=sys.stdout)
 @run_decorator
-async def 市町村(output: IO[str]) -> None:
+async def municipality_command(output: IO[str]) -> None:
     rows = [row async for row in municipality.get_rows()]
 
     print(
         """
 CREATE TABLE municipality_names
 (
-    id INTEGER PRIMARY KEY,
-    kanji TEXT UNIQUE NOT NULL,
-    kana TEXT UNIQUE NOT NULL
+    municipality_id INTEGER NOT NULL,
+    notation_id INTEGER NOT NULL,
+    `name` TEXT UNIQUE NOT NULL,
+    PRIMARY KEY(municipality_id, notation_id)
 );
 
 INSERT INTO municipality_names
 (
-        id, kanji, kana
+    municipality_id, notation_id, `name`
 )
 VALUES
         """.strip(),
@@ -50,7 +53,11 @@ VALUES
     )
 
     print(
-        *(f"    ({id:>5}, {kanji!r}, {kana!r})" for id, _, (kanji, kana) in rows),
+        *(
+            f"    ({id:>5}, {notation.value}, {name!r})"
+            for id, _, names in rows
+            for notation, name in zip(Notation, names)
+        ),
         sep=",\n",
         end=";\n",
         file=output,
