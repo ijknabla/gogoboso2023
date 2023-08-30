@@ -32,6 +32,7 @@ def main() -> None:
 @run_decorator
 async def municipality_command(output: IO[str]) -> None:
     rows = [row async for row in municipality.get_rows()]
+    kanji = {kanji: id for id, _, (kanji, _) in rows}
 
     print(
         """
@@ -64,7 +65,6 @@ VALUES
     )
 
     print(file=output)
-
     print(
         """
 CREATE TABLE municipality_tree
@@ -89,6 +89,30 @@ VALUES
             f"    ({NULL if parent_id is None else parent_id:>5}, {child_id:>5})"
             for child_id, parent_id, _ in rows
         ),
+        sep=",\n",
+        end=";\n",
+        file=output,
+    )
+
+    print(file=output)
+    print(
+        """
+CREATE TABLE municipality_list
+(
+    `index` INTEGER PRIMARY KEY,
+    id INTEGER UNIQUE NOT NULL
+);
+
+INSERT INTO municipality_list
+(
+    `index`, id
+)
+VALUES
+        """.strip(),
+        file=output,
+    )
+    print(
+        *(f"    ({i:>2}, {kanji[s]:>5})" for i, s in enumerate(municipality.ORDER, start=1)),
         sep=",\n",
         end=";\n",
         file=output,
