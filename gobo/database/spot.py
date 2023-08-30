@@ -1,6 +1,6 @@
 from sqlite3 import Connection
 
-from ..types import URI, Notation, SpotID
+from ..types import URI, Area, Notation, SpotID
 
 
 class Database:
@@ -47,5 +47,21 @@ WHERE spot_id = ?
         match cursor.fetchone():
             case (uri,):
                 return URI(uri)
+            case _:
+                raise ValueError(id)
+
+    def spot_area(self, id: SpotID) -> Area:
+        cursor = self.connection.cursor()
+        cursor.execute(
+            """
+SELECT area_id
+FROM spot_areas
+WHERE spot_id = ?
+            """,
+            (id,),
+        )
+        match cursor.fetchone():
+            case (area_id,):
+                return Area(area_id)
             case _:
                 raise ValueError(id)

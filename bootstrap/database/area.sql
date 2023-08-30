@@ -3,15 +3,11 @@ CREATE TABLE area_names
 (
     area_id INTEGER NOT NULL,
     notation_id INTEGER NOT NULL,
-    `name` TEXT UNIQUE NOT NULL,
+    area_name TEXT UNIQUE NOT NULL,
     PRIMARY KEY(area_id, notation_id)
 );
 
-INSERT INTO area_names
-(
-    area_id, notation_id, `name`
-)
-VALUES
+INSERT INTO area_names VALUES
     (1, 0, 'ベイエリア'),
     (2, 0, '東葛飾エリア'),
     (3, 0, '北総エリア'),
