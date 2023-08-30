@@ -34,6 +34,19 @@ async def excel(
 ) -> None:
     wb = Workbook()
 
+    spot_sheet = wb.create_sheet("スポット")
+    spot_sheet["A1"] = "ID"
+    spot_sheet["B1"] = "達成"
+    spot_sheet["C1"] = "名前(クリックするとページを表示)"
+
+    for i, spot_id in enumerate(db.spots, start=2):
+        spot_sheet[f"A{i}"] = spot_id
+        spot_sheet[f"B{i}"] = False
+        spot_sheet[f"C{i}"].value = db.spot_name(spot_id).replace("\u3000", " ")
+        spot_sheet[f"C{i}"].hyperlink = db.spot_uri(spot_id)
+
+    spot_sheet.auto_filter.ref = spot_sheet.dimensions
+
     municipality_sheet = wb.create_sheet("市町村")
 
     municipality_sheet["A1"] = "ID"
@@ -47,8 +60,7 @@ async def excel(
             )
         )
 
-    municipality_sheet.auto_filter.ref = municipality_sheet.dimensions
-
+    wb.remove(wb.worksheets[0])
     wb.save(output)
 
 
