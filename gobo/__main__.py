@@ -42,10 +42,12 @@ async def excel(
         municipality_sheet[f"A{i}"] = municipality_id
         municipality_sheet[f"B{i}"] = "".join(
             map(
-                partial(db.municipality_name, notation=Notation.kanji),
+                partial(db.municipality_name, notation=Notation.default),
                 db.municipality_parts(municipality_id)[1:],
             )
         )
+
+    municipality_sheet.auto_filter.ref = municipality_sheet.dimensions
 
     wb.save(output)
 

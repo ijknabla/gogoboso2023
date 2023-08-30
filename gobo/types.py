@@ -5,5 +5,5 @@ MunicipalityID = NewType("MunicipalityID", int)
 
 
 class Notation(Enum):
-    kanji = 0
+    default = 0
     hiragana = 1
