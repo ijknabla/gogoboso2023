@@ -19,3 +19,22 @@ WHERE `name` = ?
 
         (id,) = map(MunicipalityID, cursor.fetchone())
         return id
+
+    def municipality_parts(self, id: MunicipalityID) -> tuple[MunicipalityID, ...]:
+        cursor = self.connection.cursor()
+        cursor.execute(
+            """
+SELECT parent_id
+FROM municipality_parents
+WHERE id = ?
+            """,
+            (id,),
+        )
+
+        match cursor.fetchone():
+            case None:
+                return (id,)
+            case (parent_id,):
+                return (*self.municipality_parts(parent_id), id)
+            case _:
+                raise NotImplementedError()
