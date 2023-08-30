@@ -1,17 +1,20 @@
 
 CREATE TABLE area_names
 (
-    id int,
-    `name` text
+    area_id INTEGER NOT NULL,
+    notation_id INTEGER NOT NULL,
+    `name` TEXT UNIQUE NOT NULL,
+    PRIMARY KEY(area_id, notation_id)
 );
+
 INSERT INTO area_names
 (
-    id, `name`
+    area_id, notation_id, `name`
 )
 VALUES
-    (1,'ベイエリア'),
-    (2,'東葛飾エリア'),
-    (3,'北総エリア'),
-    (4,'九十九里エリア'),
-    (5,'南房総エリア'),
-    (6,'かずさ・臨海エリア');
+    (1, 0, 'ベイエリア'),
+    (2, 0, '東葛飾エリア'),
+    (3, 0, '北総エリア'),
+    (4, 0, '九十九里エリア'),
+    (5, 0, '南房総エリア'),
+    (6, 0, 'かずさ・臨海エリア');
