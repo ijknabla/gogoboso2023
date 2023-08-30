@@ -5,6 +5,13 @@ description = ""
 authors = ["ijknabla <ijknabla@gmail.com>"]
 readme = "README.md"
 
+[tool.poetry.scripts]
+gobo = "gobo.__main__:main"
+
+[tool.poetry.build]
+script = "build.py"
+generate-setup-file = false
+
 [tool.poetry.dependencies]
 python = "^3.10"
 click = "^8.1.7"
@@ -17,6 +24,18 @@ isort = "^5.12.0"
 mypy = "^1.5.1"
 pyproject-flake8 = "^6.0.0.post1"
 types-openpyxl = "^3.1.0.17"
+lxml-stubs = "^0.4.0"
+types-setuptools = "^68.1.0.0"
+
+
+[tool.poetry.group.bootstrap.dependencies]
+aiohttp = "^3.8.5"
+lxml = "^4.9.3"
+
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
 
 [build-system]
 requires = ["poetry-core"]
