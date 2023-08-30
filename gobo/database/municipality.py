@@ -6,6 +6,18 @@ from ..types import MunicipalityID, Notation
 class Database:
     connection: Connection
 
+    @property
+    def municipalities(self) -> list[MunicipalityID]:
+        cursor = self.connection.cursor()
+        cursor.execute(
+            """
+SELECT id
+FROM municipality_list
+ORDER BY `index`
+            """
+        )
+        return [index for index, in cursor.fetchall()]
+
     def municipality_by_name(self, name: str) -> MunicipalityID:
         cursor = self.connection.cursor()
         cursor.execute(
