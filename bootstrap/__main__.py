@@ -67,23 +67,28 @@ VALUES
 
     print(
         """
-CREATE TABLE municipality_parents
+CREATE TABLE municipality_tree
 (
-    id INTEGER NOT NULL,
-    parent_id INTEGER NOT NULL
+    parent_id INTEGER NULL,
+    child_id INTEGER NOT NULL
 );
 
-INSERT INTO municipality_parents
+INSERT INTO municipality_tree
 (
-        id, parent_id
+    parent_id, child_id
 )
 VALUES
         """.strip(),
         file=output,
     )
 
+    NULL = "NULL"
+
     print(
-        *(f"    ({id:>5}, {parent_id:>5})" for id, parent_id, _ in rows if parent_id is not None),
+        *(
+            f"    ({NULL if parent_id is None else parent_id:>5}, {child_id:>5})"
+            for child_id, parent_id, _ in rows
+        ),
         sep=",\n",
         end=";\n",
         file=output,

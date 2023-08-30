@@ -25,8 +25,8 @@ WHERE `name` = ?
         cursor.execute(
             """
 SELECT parent_id
-FROM municipality_parents
-WHERE id = ?
+FROM municipality_tree
+WHERE child_id = ?
             """,
             (id,),
         )
