@@ -51,7 +51,7 @@ WHERE child_id = ?
             case _:
                 raise ValueError(id)
 
-    def municipality_name(self, id: MunicipalityID, notation: Notation) -> str:
+    def municipality_name(self, id: MunicipalityID, notation: Notation = Notation.default) -> str:
         cursor = self.connection.cursor()
         cursor.execute(
             """
