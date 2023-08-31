@@ -11,7 +11,7 @@ import click
 
 from gobo.types import URI
 
-from . import municipality
+from . import area, municipality
 from .cache import Cache
 
 P = ParamSpec("P")
@@ -51,6 +51,7 @@ async def database(output: IO[str], cache_path: Path) -> None:
                 URI("http://www.tt.rim.or.jp/~ishato/tiri/code/rireki/12tiba.htm"), "cp932"
             ),
         )
+        area.create_and_insert(cursor)
 
         for sql in connection.iterdump():
             print(sql, file=output)
