@@ -1,9 +1,6 @@
-from collections.abc import AsyncGenerator, Generator, Iterator
-from contextlib import AsyncExitStack
+from collections.abc import Generator, Iterator
 from sqlite3 import Cursor
 
-from aiohttp import ClientSession
-from lxml import html
 from lxml.etree import _Element
 
 from gobo.types import Notation
@@ -73,7 +70,7 @@ ORDER = [
 
 
 def create_and_insert(cursor: Cursor, document: _Element) -> None:
-    rows = list(iter_rows(document))
+    rows = list(_iter_rows(document))
     kanji = {kanji: id for id, _, (kanji, _) in rows}
 
     cursor.execute(
@@ -152,40 +149,22 @@ VALUES
     )
 
 
-def iter_rows(document: _Element) -> Generator[tuple[int, int | None, tuple[str, str]], None, None]:
+def _iter_rows(
+    document: _Element,
+) -> Generator[tuple[int, int | None, tuple[str, str]], None, None]:
     table: _Element
     (table,) = document.xpath("//table")  # type: ignore
 
-    rows = list(flatten(table))
+    rows = list(_flatten(table))
     parents = {child: code for code, _, child in rows}
     for code, parent, child in rows:
         if parent is None:
-            yield code2int(code), None, child
+            yield _code2int(code), None, child
         else:
-            yield code2int(code), code2int(parents[parent]), child
+            yield _code2int(code), _code2int(parents[parent]), child
 
 
-async def get_rows(
-    uri: str = URI,
-) -> AsyncGenerator[tuple[int, int | None, tuple[str, str]], None]:
-    async with AsyncExitStack() as stack:
-        enter = stack.enter_async_context
-        session = await enter(ClientSession())
-        response = await enter(session.get(uri))
-        document = html.fromstring(await response.text(encoding="cp932"))
-        table: _Element
-        (table,) = document.xpath("//table")  # type: ignore
-
-        rows = list(flatten(table))
-        parents = {child: code for code, _, child in rows}
-        for code, parent, child in rows:
-            if parent is None:
-                yield code2int(code), None, child
-            else:
-                yield code2int(code), code2int(parents[parent]), child
-
-
-def flatten(
+def _flatten(
     table: _Element,
 ) -> Generator[tuple[tuple[int, int], tuple[str, str] | None, tuple[str, str]], None, None]:
     pref = ("千葉県", "ちばけん")
@@ -222,5 +201,5 @@ def flatten(
             yield code, parent, child
 
 
-def code2int(code: tuple[int, int]) -> int:
+def _code2int(code: tuple[int, int]) -> int:
     return code[0] * 1000 + code[1]
