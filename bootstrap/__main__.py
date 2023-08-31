@@ -2,13 +2,15 @@ import sys
 from asyncio import run
 from collections.abc import Callable, Coroutine
 from functools import wraps
+from pathlib import Path
 from typing import IO, Any, ParamSpec, TypeVar
 
 import click
 
-from gobo.types import Notation
+from gobo.types import URI, Notation
 
 from . import municipality
+from .cache import Cache
 
 P = ParamSpec("P")
 T = TypeVar("T")
@@ -25,6 +27,19 @@ def run_decorator(f: Callable[P, Coroutine[Any, Any, T]]) -> Callable[P, T]:
 @click.group
 def main() -> None:
     ...
+
+
+@main.command
+@run_decorator
+@click.option("-o", "--output", type=click.File("w", encoding="utf-8"), default=sys.stdout)
+@click.option(
+    "--cache-path", type=click.Path(dir_okay=False, path_type=Path), default=Path(".cache.pickle")
+)
+async def neo(output: IO[str], cache_path: Path) -> None:
+    with Cache(cache_path) as cache:
+        await cache.get_html(
+            URI("http://www.tt.rim.or.jp/~ishato/tiri/code/rireki/12tiba.htm"), "cp932"
+        )
 
 
 @main.command(name="municipality")
