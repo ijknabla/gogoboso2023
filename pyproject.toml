@@ -27,6 +27,7 @@ types-setuptools = "^68.1.0.0"
 [tool.poetry.group.bootstrap.dependencies]
 aiohttp = "^3.8.5"
 lxml = "^4.9.3"
+selenium = "^4.11.2"
 
 
 [tool.poetry.group.test.dependencies]
