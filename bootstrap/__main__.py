@@ -11,7 +11,7 @@ import click
 
 from gobo.types import URI
 
-from . import area, municipality
+from . import area, municipality, spot
 from .cache import Cache
 
 P = ParamSpec("P")
@@ -52,6 +52,7 @@ async def database(output: IO[str], cache_path: Path) -> None:
             ),
         )
         area.create_and_insert(cursor)
+        spot.create_and_insert(cursor)
 
         for sql in connection.iterdump():
             print(sql, file=output)
