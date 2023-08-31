@@ -1,9 +1,9 @@
-from collections.abc import AsyncGenerator, Generator, Iterator
-from contextlib import AsyncExitStack
+from collections.abc import Generator, Iterator
+from sqlite3 import Cursor
 
-from aiohttp import ClientSession
-from lxml import html
 from lxml.etree import _Element
+
+from gobo.types import Notation
 
 URI = "http://www.tt.rim.or.jp/~ishato/tiri/code/rireki/12tiba.htm"
 ORDER = [
@@ -69,27 +69,102 @@ ORDER = [
 ]
 
 
-async def get_rows(
-    uri: str = URI,
-) -> AsyncGenerator[tuple[int, int | None, tuple[str, str]], None]:
-    async with AsyncExitStack() as stack:
-        enter = stack.enter_async_context
-        session = await enter(ClientSession())
-        response = await enter(session.get(uri))
-        document = html.fromstring(await response.text(encoding="cp932"))
-        table: _Element
-        (table,) = document.xpath("//table")  # type: ignore
+def create_and_insert(cursor: Cursor, document: _Element) -> None:
+    rows = list(_iter_rows(document))
+    kanji = {kanji: id for id, _, (kanji, _) in rows}
 
-        rows = list(flatten(table))
-        parents = {child: code for code, _, child in rows}
-        for code, parent, child in rows:
-            if parent is None:
-                yield code2int(code), None, child
-            else:
-                yield code2int(code), code2int(parents[parent]), child
+    cursor.execute(
+        """
+CREATE TABLE municipality_names
+(
+    municipality_id INTEGER NOT NULL,
+    notation_id INTEGER NOT NULL,
+    municipality_name TEXT UNIQUE NOT NULL,
+    PRIMARY KEY(municipality_id, notation_id)
+)
+        """
+    )
+    cursor.executemany(
+        """
+INSERT INTO municipality_names
+(
+    municipality_id, notation_id, municipality_name
+)
+VALUES
+(
+    ?, ?, ?
+)
+        """,
+        (
+            (id, notation.value, name)
+            for id, _, names in rows
+            for notation, name in zip(Notation, names)
+        ),
+    )
+
+    cursor.execute(
+        """
+CREATE TABLE municipality_tree
+(
+    parent_id INTEGER NULL,
+    child_id INTEGER NOT NULL
+)
+        """
+    )
+    cursor.executemany(
+        """
+INSERT INTO municipality_tree
+(
+    parent_id, child_id
+)
+VALUES
+(
+    ?, ?
+)
+        """,
+        ((parent_id, child_id) for child_id, parent_id, _ in rows),
+    )
+
+    cursor.execute(
+        """
+CREATE TABLE municipality_list
+(
+    `index` INTEGER PRIMARY KEY,
+    id INTEGER UNIQUE NOT NULL
+)
+        """
+    )
+    cursor.executemany(
+        """
+INSERT INTO municipality_list
+(
+    `index`, id
+)
+VALUES
+(
+    ?, ?
+)
+        """,
+        ((i, kanji[s]) for i, s in enumerate(ORDER, start=1)),
+    )
 
 
-def flatten(
+def _iter_rows(
+    document: _Element,
+) -> Generator[tuple[int, int | None, tuple[str, str]], None, None]:
+    table: _Element
+    (table,) = document.xpath("//table")  # type: ignore
+
+    rows = list(_flatten(table))
+    parents = {child: code for code, _, child in rows}
+    for code, parent, child in rows:
+        if parent is None:
+            yield _code2int(code), None, child
+        else:
+            yield _code2int(code), _code2int(parents[parent]), child
+
+
+def _flatten(
     table: _Element,
 ) -> Generator[tuple[tuple[int, int], tuple[str, str] | None, tuple[str, str]], None, None]:
     pref = ("千葉県", "ちばけん")
@@ -126,5 +201,5 @@ def flatten(
             yield code, parent, child
 
 
-def code2int(code: tuple[int, int]) -> int:
+def _code2int(code: tuple[int, int]) -> int:
     return code[0] * 1000 + code[1]

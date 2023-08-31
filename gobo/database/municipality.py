@@ -24,7 +24,7 @@ ORDER BY `index`
             """
 SELECT municipality_id
 FROM municipality_names
-WHERE `name` = ?
+WHERE municipality_name = ?
         """,
             (name,),
         )
@@ -55,7 +55,7 @@ WHERE child_id = ?
         cursor = self.connection.cursor()
         cursor.execute(
             """
-SELECT `name`
+SELECT municipality_name
 FROM municipality_names
 WHERE municipality_id = ? AND notation_id = ?
             """,

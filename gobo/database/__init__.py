@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from functools import cache
 from sqlite3 import Connection, connect
 
-from pkg_resources import resource_filename
+from pkg_resources import resource_string
 
 from . import area, municipality, spot
 
@@ -18,7 +18,10 @@ class Database(area.Database, municipality.Database, spot.Database):
 
 @cache
 def _get_db() -> Database:
-    db = Database(connect(resource_filename(__name__, "gobo.db")))
+    connection = connect(":memory:")
+    connection.cursor().executescript(resource_string(__name__, "gobo.sql").decode("utf-8"))
+
+    db = Database(connection)
     atexit.register(db.close)
     return db
 
