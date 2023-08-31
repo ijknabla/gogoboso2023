@@ -44,12 +44,20 @@ async def neo(output: IO[str], cache_path: Path) -> None:
 
         cache = enter(Cache(cache_path))
 
+        cursor = connection.cursor()
+        municipality.create_and_insert(
+            cursor,
+            await cache.get_html(
+                URI("http://www.tt.rim.or.jp/~ishato/tiri/code/rireki/12tiba.htm"), "cp932"
+            ),
+        )
+
         await cache.get_html(
             URI("http://www.tt.rim.or.jp/~ishato/tiri/code/rireki/12tiba.htm"), "cp932"
         )
 
         for sql in connection.iterdump():
-            output.write(sql)
+            print(sql, file=output)
 
 
 @main.command(name="municipality")

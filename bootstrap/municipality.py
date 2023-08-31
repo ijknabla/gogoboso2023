@@ -1,9 +1,12 @@
 from collections.abc import AsyncGenerator, Generator, Iterator
 from contextlib import AsyncExitStack
+from sqlite3 import Cursor
 
 from aiohttp import ClientSession
 from lxml import html
 from lxml.etree import _Element
+
+from gobo.types import Notation
 
 URI = "http://www.tt.rim.or.jp/~ishato/tiri/code/rireki/12tiba.htm"
 ORDER = [
@@ -67,6 +70,99 @@ ORDER = [
     "南房総市",
     "館山市",
 ]
+
+
+def create_and_insert(cursor: Cursor, document: _Element) -> None:
+    rows = list(iter_rows(document))
+    kanji = {kanji: id for id, _, (kanji, _) in rows}
+
+    cursor.execute(
+        """
+CREATE TABLE municipality_names
+(
+    municipality_id INTEGER NOT NULL,
+    notation_id INTEGER NOT NULL,
+    municipality_name TEXT UNIQUE NOT NULL,
+    PRIMARY KEY(municipality_id, notation_id)
+)
+        """
+    )
+    cursor.executemany(
+        """
+INSERT INTO municipality_names
+(
+    municipality_id, notation_id, municipality_name
+)
+VALUES
+(
+    ?, ?, ?
+)
+        """,
+        (
+            (id, notation.value, name)
+            for id, _, names in rows
+            for notation, name in zip(Notation, names)
+        ),
+    )
+
+    cursor.execute(
+        """
+CREATE TABLE municipality_tree
+(
+    parent_id INTEGER NULL,
+    child_id INTEGER NOT NULL
+)
+        """
+    )
+    cursor.executemany(
+        """
+INSERT INTO municipality_tree
+(
+    parent_id, child_id
+)
+VALUES
+(
+    ?, ?
+)
+        """,
+        ((parent_id, child_id) for child_id, parent_id, _ in rows),
+    )
+
+    cursor.execute(
+        """
+CREATE TABLE municipality_list
+(
+    `index` INTEGER PRIMARY KEY,
+    id INTEGER UNIQUE NOT NULL
+)
+        """
+    )
+    cursor.executemany(
+        """
+INSERT INTO municipality_list
+(
+    `index`, id
+)
+VALUES
+(
+    ?, ?
+)
+        """,
+        ((i, kanji[s]) for i, s in enumerate(ORDER, start=1)),
+    )
+
+
+def iter_rows(document: _Element) -> Generator[tuple[int, int | None, tuple[str, str]], None, None]:
+    table: _Element
+    (table,) = document.xpath("//table")  # type: ignore
+
+    rows = list(flatten(table))
+    parents = {child: code for code, _, child in rows}
+    for code, parent, child in rows:
+        if parent is None:
+            yield code2int(code), None, child
+        else:
+            yield code2int(code), code2int(parents[parent]), child
 
 
 async def get_rows(
