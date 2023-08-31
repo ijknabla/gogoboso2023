@@ -1,8 +1,10 @@
 import sys
 from asyncio import run
 from collections.abc import Callable, Coroutine
+from contextlib import AsyncExitStack
 from functools import wraps
 from pathlib import Path
+from sqlite3 import connect
 from typing import IO, Any, ParamSpec, TypeVar
 
 import click
@@ -36,10 +38,18 @@ def main() -> None:
     "--cache-path", type=click.Path(dir_okay=False, path_type=Path), default=Path(".cache.pickle")
 )
 async def neo(output: IO[str], cache_path: Path) -> None:
-    with Cache(cache_path) as cache:
+    async with AsyncExitStack() as stack:
+        enter = stack.enter_context
+        connection = enter(connect(":memory:"))
+
+        cache = enter(Cache(cache_path))
+
         await cache.get_html(
             URI("http://www.tt.rim.or.jp/~ishato/tiri/code/rireki/12tiba.htm"), "cp932"
         )
+
+        for sql in connection.iterdump():
+            output.write(sql)
 
 
 @main.command(name="municipality")
