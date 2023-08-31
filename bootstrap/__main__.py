@@ -52,10 +52,6 @@ async def neo(output: IO[str], cache_path: Path) -> None:
             ),
         )
 
-        await cache.get_html(
-            URI("http://www.tt.rim.or.jp/~ishato/tiri/code/rireki/12tiba.htm"), "cp932"
-        )
-
         for sql in connection.iterdump():
             print(sql, file=output)
 
