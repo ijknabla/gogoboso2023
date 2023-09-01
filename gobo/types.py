@@ -11,6 +11,7 @@ class Area(Enum):
     かずさ_臨海 = 6
 
 
+CategoryID = NewType("CategoryID", int)
 MunicipalityID = NewType("MunicipalityID", int)
 
 

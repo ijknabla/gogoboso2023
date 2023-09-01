@@ -15,11 +15,27 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 from tqdm import tqdm
 
+from gobo.types import CategoryID
+
 from .types import Spot
 
 
 class BootOption(TypedDict):
+    mapCategories: list[MapCategory]
     stampRallySpots: list[StampRallySpot]
+
+
+class MapCategory(TypedDict):
+    parentCategoryId: CategoryID
+    categoryId: CategoryID
+    shapes: list[Shape]
+    mapCategoryGroup: str
+    categoryName: str
+
+
+class Shape(TypedDict):
+    description: str
+    name: str
 
 
 class StampRallySpot(TypedDict):
