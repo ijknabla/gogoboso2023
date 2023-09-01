@@ -33,6 +33,15 @@ def main() -> None:
     ...
 
 
+@main.command(name="boot-option")
+@click.option("-o", "--output", type=click.File("w", encoding="utf-8"), default=sys.stdout)
+@click.option("--indent", type=int, default=2)
+def boot_option_command(output: IO[str], indent: int | None) -> None:
+    with open_chrome_driver() as driver:
+        (boot_option,) = platinum.find_boot_options(driver)
+    json.dump(boot_option, output, indent=indent)
+
+
 @main.command(name="spots")
 @run_decorator
 @click.option("-o", "--output", type=click.File("w", encoding="utf-8"), default=sys.stdout)
