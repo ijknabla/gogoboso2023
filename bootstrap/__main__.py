@@ -6,7 +6,7 @@ from contextlib import AsyncExitStack, ExitStack, contextmanager
 from functools import wraps
 from pathlib import Path
 from sqlite3 import connect
-from typing import IO, Any, ParamSpec, TypeVar
+from typing import IO, Any, ParamSpec, TypeVar, cast
 
 import click
 from selenium import webdriver
@@ -42,16 +42,24 @@ def boot_option_command(output: IO[str], indent: int | None) -> None:
     json.dump(boot_option, output, indent=indent)
 
 
-@main.command(name="spots")
+@main.command(name="spot")
 @run_decorator
+@click.argument("boot-option-json", type=click.File("r", encoding="utf-8"))
 @click.option("-o", "--output", type=click.File("w", encoding="utf-8"), default=sys.stdout)
 @click.option("-j", type=int, default=4)
 @click.option("--indent", type=int, default=2)
-async def spots_command(output: IO[str], indent: int | None, j: int) -> None:
+async def spot_command(
+    boot_option_json: IO[str],
+    output: IO[str],
+    indent: int | None,
+    j: int,
+) -> None:
+    boot_option = cast(platinum.BootOption, json.load(boot_option_json))
+
     with ExitStack() as stack:
         drivers = [stack.enter_context(open_chrome_driver()) for _ in range(max(1, j))]
-        (boot_option,) = platinum.find_boot_options(drivers[-1])
         data = await platinum.get_spots(drivers, boot_option)
+
     json.dump(data, output, indent=indent)
 
 
