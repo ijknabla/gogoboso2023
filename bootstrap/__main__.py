@@ -1,17 +1,18 @@
 import sys
 from asyncio import run
-from collections.abc import Callable, Coroutine
-from contextlib import AsyncExitStack
+from collections.abc import Callable, Coroutine, Generator
+from contextlib import AsyncExitStack, contextmanager
 from functools import wraps
 from pathlib import Path
 from sqlite3 import connect
 from typing import IO, Any, ParamSpec, TypeVar
 
 import click
+from selenium import webdriver
 
 from gobo.types import URI
 
-from . import area, municipality, spot
+from . import area, municipality, platinum, spot
 from .cache import Cache
 
 P = ParamSpec("P")
@@ -44,6 +45,9 @@ async def database(output: IO[str], cache_path: Path) -> None:
 
         cache = enter(Cache(cache_path))
 
+        with open_chrome_driver() as driver:
+            (boot_option,) = platinum.find_boot_options(driver)
+
         cursor = connection.cursor()
         municipality.create_and_insert(
             cursor,
@@ -56,6 +60,23 @@ async def database(output: IO[str], cache_path: Path) -> None:
 
         for sql in connection.iterdump():
             print(sql, file=output)
+
+
+@contextmanager
+def open_chrome_driver() -> Generator[webdriver.Chrome, None, None]:
+    options = webdriver.ChromeOptions()
+
+    options.add_argument("--headless")  # type: ignore
+
+    # 日本語指定しておく
+    options.add_argument("--lang=ja-JP")  # type: ignore
+    options.add_experimental_option("prefs", {"intl.accept_languages": "ja"})
+
+    driver = webdriver.Chrome(options=options)
+    try:
+        yield driver
+    finally:
+        driver.close()
 
 
 if __name__ == "__main__":
