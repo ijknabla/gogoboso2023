@@ -9,6 +9,7 @@ from lxml import html
 from lxml.etree import _Element
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
+from tqdm import tqdm
 
 from .types import Data, Spot, SpotID
 
@@ -31,7 +32,9 @@ def find_boot_options(driver: WebDriver) -> Generator[BootOption, None, None]:
 
 def scraping(driver: WebDriver, boot_option: BootOption) -> Data:
     spots: dict[SpotID, Spot] = {}
-    for stampRallySpot in sorted(boot_option["stampRallySpots"], key=lambda spot: spot["spotId"]):
+    for stampRallySpot in tqdm(
+        sorted(boot_option["stampRallySpots"], key=lambda spot: spot["spotId"])
+    ):
         spot = cast(Spot, {"id": stampRallySpot["spotId"], "name": stampRallySpot["spotTitle"]})
         spots[spot["id"]] = spot
 
