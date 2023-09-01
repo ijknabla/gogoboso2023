@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from typing import NewType, TypedDict
+from typing import TYPE_CHECKING, NewType, TypedDict
+
+if TYPE_CHECKING:
+    from typing_extensions import NotRequired
 
 
 class Data(TypedDict):
@@ -14,4 +17,4 @@ class Spot(TypedDict):
     id: SpotID
     name: str
     address: str
-    uri: str
+    uri: NotRequired[str]

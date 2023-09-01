@@ -2,7 +2,7 @@ import json
 import sys
 from asyncio import run
 from collections.abc import Callable, Coroutine, Generator
-from contextlib import AsyncExitStack, contextmanager
+from contextlib import AsyncExitStack, ExitStack, contextmanager
 from functools import wraps
 from pathlib import Path
 from sqlite3 import connect
@@ -33,13 +33,16 @@ def main() -> None:
     ...
 
 
-@main.command(name="json")
+@main.command(name="spots")
+@run_decorator
 @click.option("-o", "--output", type=click.File("w", encoding="utf-8"), default=sys.stdout)
-@click.option("--indent", type=int)
-def json_command(output: IO[str], indent: int | None) -> None:
-    with open_chrome_driver() as driver:
-        (boot_option,) = platinum.find_boot_options(driver)
-        data = platinum.scraping(driver, boot_option)
+@click.option("-j", type=int, default=4)
+@click.option("--indent", type=int, default=2)
+async def spots_command(output: IO[str], indent: int | None, j: int) -> None:
+    with ExitStack() as stack:
+        drivers = [stack.enter_context(open_chrome_driver()) for _ in range(max(1, j))]
+        (boot_option,) = platinum.find_boot_options(drivers[-1])
+        data = await platinum.get_spots(drivers, boot_option)
     json.dump(data, output, indent=indent)
 
 
