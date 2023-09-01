@@ -29,6 +29,7 @@ def main() -> None:
 
 CLEARED = "A"
 NAME = "B"
+MUNICIPALITY = "C"
 
 
 @main.command
@@ -42,22 +43,22 @@ async def excel(
     spot_sheet = wb.create_sheet("スポット")
     spot_sheet[f"{CLEARED}1"] = "達成"
     spot_sheet[f"{NAME}1"] = "名前"
-    spot_sheet["D1"] = "市町村"
+    spot_sheet[f"{MUNICIPALITY}1"] = "市町村"
 
     for i, spot_id in enumerate(db.spots, start=2):
         spot_sheet[f"{CLEARED}{i}"] = False
         spot_sheet[f"{NAME}{i}"].value = db.spot_name(spot_id).replace("\u3000", " ")
-        spot_sheet[f"D{i}"] = scraping_address(spot_id)
-        spot_sheet[f"E{i}"].value = "リンク(GoGo房総)"
-        spot_sheet[f"E{i}"].hyperlink = f"https://platinumaps.jp/d/gogo-boso?s={spot_id}"
+        spot_sheet[f"{MUNICIPALITY}{i}"] = scraping_address(spot_id)
+        spot_sheet[f"D{i}"].value = "リンク(GoGo房総)"
+        spot_sheet[f"D{i}"].hyperlink = f"https://platinumaps.jp/d/gogo-boso?s={spot_id}"
         with suppress(ValueError):
-            spot_sheet[f"F{i}"].hyperlink = db.spot_uri(spot_id)
-            spot_sheet[f"F{i}"].value = "リンク(施設)"
+            spot_sheet[f"E{i}"].hyperlink = db.spot_uri(spot_id)
+            spot_sheet[f"E{i}"].value = "リンク(施設)"
 
     spot_sheet.auto_filter.ref = spot_sheet.dimensions
 
     spot_clear_range = f"スポット!${CLEARED}${1+1}:${CLEARED}${1+len(db.spots)}"
-    spot_area_range = f"スポット!$D{1+1}:$D{1+len(db.spots)}"
+    spot_area_range = f"スポット!${MUNICIPALITY}${1+1}:${MUNICIPALITY}${1+len(db.spots)}"
 
     total_sheet = wb.create_sheet("集計")
     total_sheet["A1"] = "市町村"
