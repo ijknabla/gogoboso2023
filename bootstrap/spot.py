@@ -6,6 +6,4 @@ from .platinum import BootOption
 
 
 def create_and_insert(cursor: Cursor, boot_option: BootOption) -> None:
-    boot_option["stampRallySpots"]
-
     cursor.executescript(resource_string(__name__, "spot.sql").decode("utf-8"))
