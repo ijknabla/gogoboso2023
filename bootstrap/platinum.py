@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import re
 from collections.abc import Generator
@@ -10,6 +12,10 @@ from selenium.webdriver.remote.webdriver import WebDriver
 
 
 class BootOption(TypedDict):
+    stampRallySpots: list[StampRallySpot]
+
+
+class StampRallySpot(TypedDict):
     ...
 
 

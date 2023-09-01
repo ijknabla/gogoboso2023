@@ -56,7 +56,7 @@ async def database(output: IO[str], cache_path: Path) -> None:
             ),
         )
         area.create_and_insert(cursor)
-        spot.create_and_insert(cursor)
+        spot.create_and_insert(cursor, boot_option)
 
         for sql in connection.iterdump():
             print(sql, file=output)
