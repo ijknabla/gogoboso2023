@@ -98,7 +98,7 @@ async def database_bak(output: IO[str], cache_path: Path) -> None:
 def open_chrome_driver() -> Generator[webdriver.Chrome, None, None]:
     options = webdriver.ChromeOptions()
 
-    options.add_argument("--headless")  # type: ignore
+    # options.add_argument("--headless")  # type: ignore
 
     # 日本語指定しておく
     options.add_argument("--lang=ja-JP")  # type: ignore
