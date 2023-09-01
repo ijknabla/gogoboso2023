@@ -4,7 +4,7 @@ import json
 import re
 from asyncio import gather, get_running_loop
 from collections.abc import Collection, Generator, Iterable
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor as Executor
 from itertools import product
 from typing import TypedDict, cast
 
@@ -36,7 +36,7 @@ def find_boot_options(driver: WebDriver) -> Generator[BootOption, None, None]:
 async def get_spots(drivers: Collection[WebDriver], boot_option: BootOption) -> list[Spot]:
     iterator = iter(tqdm(boot_option["stampRallySpots"]))
 
-    with ThreadPoolExecutor(len(drivers)) as executor:
+    with Executor(len(drivers)) as executor:
         spots: list[Spot] = sum(
             await gather(*(_each_get_spots(executor, driver, iterator) for driver in drivers)), []
         )
@@ -45,7 +45,7 @@ async def get_spots(drivers: Collection[WebDriver], boot_option: BootOption) -> 
 
 
 async def _each_get_spots(
-    executor: ThreadPoolExecutor, driver: WebDriver, spots: Iterable[StampRallySpot]
+    executor: Executor, driver: WebDriver, spots: Iterable[StampRallySpot]
 ) -> list[Spot]:
     loop = get_running_loop()
     return [await loop.run_in_executor(executor, _get_spot, driver, spot) for spot in spots]
