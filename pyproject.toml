@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gobo"
-version = "0.0.0"
+version = "0.0.0a0"
 description = ""
 authors = ["ijknabla <ijknabla@gmail.com>"]
 readme = "README.md"
