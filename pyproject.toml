@@ -22,12 +22,14 @@ pyproject-flake8 = "^6.0.0.post1"
 types-openpyxl = "^3.1.0.17"
 lxml-stubs = "^0.4.0"
 types-setuptools = "^68.1.0.0"
+types-tqdm = "^4.66.0.2"
 
 
 [tool.poetry.group.bootstrap.dependencies]
 aiohttp = "^3.8.5"
 lxml = "^4.9.3"
 selenium = "^4.11.2"
+tqdm = "^4.66.1"
 
 
 [tool.poetry.group.test.dependencies]
