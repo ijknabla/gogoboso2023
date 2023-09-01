@@ -1,3 +1,4 @@
+import json
 import sys
 from asyncio import run
 from collections.abc import Callable, Coroutine, Generator
@@ -30,6 +31,15 @@ def run_decorator(f: Callable[P, Coroutine[Any, Any, T]]) -> Callable[P, T]:
 @click.group
 def main() -> None:
     ...
+
+
+@main.command(name="json")
+@click.option("-o", "--output", type=click.File("w", encoding="utf-8"), default=sys.stdout)
+@click.option("--indent", type=int)
+def json_command(output: IO[str], indent: int | None) -> None:
+    with open_chrome_driver() as driver:
+        (boot_option,) = platinum.find_boot_options(driver)
+    json.dump(boot_option, output, indent=indent)
 
 
 @main.command
