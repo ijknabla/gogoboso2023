@@ -1,14 +1,14 @@
 from asyncio import run
 from collections.abc import Callable, Coroutine
 from contextlib import suppress
-from functools import partial, wraps
+from functools import wraps
 from typing import Any, ParamSpec, TypeVar
 
 import click
 from openpyxl import Workbook
 
 from .database import db
-from .types import Notation, SpotID
+from .types import SpotID
 
 P = ParamSpec("P")
 T = TypeVar("T")
@@ -36,13 +36,11 @@ async def excel(
     wb = Workbook()
 
     spot_sheet = wb.create_sheet("スポット")
-    spot_sheet["A1"] = "ID"
     spot_sheet["B1"] = "達成"
     spot_sheet["C1"] = "名前"
     spot_sheet["D1"] = "市町村"
 
     for i, spot_id in enumerate(db.spots, start=2):
-        spot_sheet[f"A{i}"] = spot_id
         spot_sheet[f"B{i}"] = False
         spot_sheet[f"C{i}"].value = db.spot_name(spot_id).replace("\u3000", " ")
         spot_sheet[f"D{i}"] = scraping_address(spot_id)
@@ -72,19 +70,6 @@ async def excel(
             f"C{i}"
         ] = f'=COUNTIFS({spot_area_range}, "*{db.municipality_name(municipality_id)}*")'
         total_sheet[f"D{i}"] = f"=100 * $B${i} / $C${i}"
-
-    municipality_sheet = wb.create_sheet("市町村データベース")
-
-    municipality_sheet["A1"] = "ID"
-    municipality_sheet["B1"] = "名前"
-    for i, municipality_id in enumerate(db.municipalities, start=2):
-        municipality_sheet[f"A{i}"] = municipality_id
-        municipality_sheet[f"B{i}"] = "".join(
-            map(
-                partial(db.municipality_name, notation=Notation.default),
-                db.municipality_parts(municipality_id)[1:],
-            )
-        )
 
     wb.remove(wb.worksheets[0])
     wb.save(output)
