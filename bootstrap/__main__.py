@@ -39,7 +39,8 @@ def main() -> None:
 def json_command(output: IO[str], indent: int | None) -> None:
     with open_chrome_driver() as driver:
         (boot_option,) = platinum.find_boot_options(driver)
-    json.dump(boot_option, output, indent=indent)
+        data = platinum.scraping(driver, boot_option)
+    json.dump(data, output, indent=indent)
 
 
 @main.command
