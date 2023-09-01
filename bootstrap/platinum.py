@@ -5,7 +5,8 @@ import re
 from asyncio import gather, get_running_loop
 from collections.abc import Collection, Generator, Iterable
 from concurrent.futures import ThreadPoolExecutor as Executor
-from itertools import product
+from itertools import count, product
+from time import sleep
 from typing import TypedDict, cast
 
 from lxml import html
@@ -63,20 +64,59 @@ def _get_spot(driver: WebDriver, spot: StampRallySpot) -> Spot:
     driver.get(f"https://platinumaps.jp/d/gogo-boso?s={result['id']}")
     for frame in driver.find_elements(by=By.XPATH, value="//iframe"):
         driver.switch_to.frame(frame)
-        for tr in driver.find_elements(by=By.XPATH, value='//tr[@class = "poiproperties__item"]'):
-            for itemlabel, a in product(
-                tr.find_elements(
-                    by=By.XPATH, value='child::th[@class = "poiproperties__itemlabel"]'
-                ),
-                tr.find_elements(by=By.XPATH, value="descendant::a"),
+
+        for i in count(1):
+            for tr in driver.find_elements(
+                by=By.XPATH, value='//tr[@class = "poiproperties__item"]'
             ):
-                match itemlabel.text:
-                    case "住所":
-                        result["address"] = a.text
-                    case "URL":
-                        href = a.get_attribute("href")
-                        assert href is not None
-                        result["uri"] = href
+                for itemlabel, a in product(
+                    tr.find_elements(
+                        by=By.XPATH, value='child::th[@class = "poiproperties__itemlabel"]'
+                    ),
+                    tr.find_elements(by=By.XPATH, value="descendant::a"),
+                ):
+                    match itemlabel.text:
+                        case "住所":
+                            result["address"] = a.text
+                        case "URL":
+                            href = a.get_attribute("href")
+                            assert href is not None
+                            result["uri"] = href
+
+            if (
+                True
+                and "address" in result
+                and (
+                    "uri" in result
+                    or spot["spotId"]
+                    in {
+                        208399,
+                        208417,
+                        208428,
+                        208448,
+                        208449,
+                        208470,
+                        208478,
+                        208495,
+                        208496,
+                        208568,
+                        208581,
+                        208615,
+                        208616,
+                        208639,
+                        208642,
+                        208663,
+                    }
+                )
+            ):
+                break
+
+            if i <= 30:
+                sleep(1)
+                continue
+
+            print(driver.current_url)
+            break
 
     return result
 
