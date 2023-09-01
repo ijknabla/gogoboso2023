@@ -53,10 +53,11 @@ def scraping(driver: WebDriver, boot_option: BootOption) -> Data:
                         (a,) = tr.find_elements(by=By.XPATH, value="descendant::a")
                         spot["address"] = a.text
                     case "URL":
-                        (a,) = tr.find_elements(by=By.XPATH, value="descendant::a")
-                        href = a.get_attribute("href")
-                        assert href is not None
-                        spot["uri"] = href
+                        for a in tr.find_elements(by=By.XPATH, value="descendant::a"):
+                            href = a.get_attribute("href")
+                            assert href is not None
+                            spot["uri"] = href
+                            break
 
     return Data(spots=spots)
 
