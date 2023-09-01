@@ -27,6 +27,10 @@ def main() -> None:
     ...
 
 
+CLEARED = "A"
+NAME = "B"
+
+
 @main.command
 @click.argument("output", type=click.Path(dir_okay=False))
 @run_decorator
@@ -36,13 +40,13 @@ async def excel(
     wb = Workbook()
 
     spot_sheet = wb.create_sheet("スポット")
-    spot_sheet["B1"] = "達成"
-    spot_sheet["C1"] = "名前"
+    spot_sheet[f"{CLEARED}1"] = "達成"
+    spot_sheet[f"{NAME}1"] = "名前"
     spot_sheet["D1"] = "市町村"
 
     for i, spot_id in enumerate(db.spots, start=2):
-        spot_sheet[f"B{i}"] = False
-        spot_sheet[f"C{i}"].value = db.spot_name(spot_id).replace("\u3000", " ")
+        spot_sheet[f"{CLEARED}{i}"] = False
+        spot_sheet[f"{NAME}{i}"].value = db.spot_name(spot_id).replace("\u3000", " ")
         spot_sheet[f"D{i}"] = scraping_address(spot_id)
         spot_sheet[f"E{i}"].value = "リンク(GoGo房総)"
         spot_sheet[f"E{i}"].hyperlink = f"https://platinumaps.jp/d/gogo-boso?s={spot_id}"
@@ -52,7 +56,7 @@ async def excel(
 
     spot_sheet.auto_filter.ref = spot_sheet.dimensions
 
-    spot_clear_range = f"スポット!$B{1+1}:$B{1+len(db.spots)}"
+    spot_clear_range = f"スポット!${CLEARED}${1+1}:${CLEARED}${1+len(db.spots)}"
     spot_area_range = f"スポット!$D{1+1}:$D{1+len(db.spots)}"
 
     total_sheet = wb.create_sheet("集計")
