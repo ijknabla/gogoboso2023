@@ -6,7 +6,7 @@ from contextlib import AsyncExitStack, ExitStack, contextmanager
 from functools import wraps
 from pathlib import Path
 from sqlite3 import connect
-from typing import IO, Any, ParamSpec, TypeVar, cast
+from typing import IO, Any, ParamSpec, TypeVar
 
 import click
 from selenium import webdriver
@@ -56,12 +56,10 @@ async def database(
     input_file: IO[str],
     output_file: IO[str],
 ) -> None:
-    boot_option = cast(platinum.BootOption, json.load(input_file))
-
     with connect(":memory:") as connection:
         cursor = connection.cursor()
         area.create_and_insert(cursor)
-        spot.create_and_insert(cursor, boot_option)
+        spot.create_and_insert(cursor)
 
         for sql in connection.iterdump():
             print(sql, file=output_file)
@@ -80,9 +78,6 @@ async def database_bak(output: IO[str], cache_path: Path) -> None:
 
         cache = enter(Cache(cache_path))
 
-        with open_chrome_driver() as driver:
-            (boot_option,) = platinum.find_boot_options(driver)
-
         cursor = connection.cursor()
         municipality.create_and_insert(
             cursor,
@@ -91,7 +86,7 @@ async def database_bak(output: IO[str], cache_path: Path) -> None:
             ),
         )
         area.create_and_insert(cursor)
-        spot.create_and_insert(cursor, boot_option)
+        spot.create_and_insert(cursor)
 
         for sql in connection.iterdump():
             print(sql, file=output)
