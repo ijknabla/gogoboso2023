@@ -39,7 +39,7 @@ def main() -> None:
 def boot_option_command(output: IO[str], indent: int | None) -> None:
     with open_chrome_driver() as driver:
         (boot_option,) = platinum.find_boot_options(driver)
-    json.dump(boot_option, output, indent=indent)
+    json.dump(boot_option, output, indent=indent, ensure_ascii=False)
 
 
 @main.command(name="spot")
@@ -60,7 +60,7 @@ async def spot_command(
         drivers = [stack.enter_context(open_chrome_driver()) for _ in range(max(1, j))]
         data = await platinum.get_spots(drivers, boot_option)
 
-    json.dump(data, output, indent=indent)
+    json.dump(data, output, indent=indent, ensure_ascii=False)
 
 
 @main.command
