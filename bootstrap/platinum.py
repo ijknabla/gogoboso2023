@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import re
 from asyncio import gather, get_running_loop
-from collections.abc import Callable, Collection, Coroutine, Generator, Iterable
+from collections.abc import Callable, Collection, Coroutine, Generator, Iterable, Mapping
 from concurrent.futures import ThreadPoolExecutor as Executor
 from functools import partial
 from itertools import chain, count, product
@@ -17,7 +17,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 from tqdm import tqdm
 
-from gobo.types import CategoryID
+from gobo.types import CategoryID, SpotID
 
 from .types import Category, Course, Spot
 
@@ -64,7 +64,7 @@ class Shape(TypedDict):
 
 
 class StampRallySpot(TypedDict):
-    spotId: int
+    spotId: SpotID
     spotTitle: str
 
 
@@ -80,8 +80,11 @@ async def get_spots(drivers: Collection[WebDriver], boot_option: BootOption) -> 
 
 
 async def get_categories(drivers: Collection[WebDriver], boot_option: BootOption) -> list[Category]:
+    spot_ids = {spot["spotTitle"]: spot["spotId"] for spot in boot_option["stampRallySpots"]}
+
     return sorted(
-        await _get_categories(drivers, boot_option["mapCategories"]), key=itemgetter("id")
+        await _get_categories(drivers, boot_option["mapCategories"], spot_ids=spot_ids),
+        key=itemgetter("id"),
     )
 
 
@@ -182,7 +185,9 @@ def _get_spots(driver: WebDriver, spot: StampRallySpot) -> Spot:
 
 
 @vectorize
-def _get_categories(driver: WebDriver, category: MapCategory) -> Category:
+def _get_categories(
+    driver: WebDriver, category: MapCategory, spot_ids: Mapping[str, SpotID]
+) -> Category:
     result = Category(
         id=category["categoryId"],
         parent_id=category["parentCategoryId"],
