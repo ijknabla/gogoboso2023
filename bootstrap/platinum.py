@@ -25,6 +25,9 @@ _P = ParamSpec("_P")
 _T1 = TypeVar("_T1")
 _T2 = TypeVar("_T2")
 
+INTERVAL = 1.0
+REPEAT = 30
+
 NO_URL_SPOTS = {
     208399,
     208417,
@@ -231,19 +234,37 @@ def _get_categories(
         parent_id=category["parentCategoryId"],
         name=category["categoryName"],
         ref=category["mapCategoryGroup"],
-        spots=[],
+        spot_ids=[],
     )
 
     driver.get(f"https://platinumaps.jp/d/gogo-boso?c={result['ref']}&list=1")
     for frame in driver.find_elements(by=By.XPATH, value="//iframe"):
         driver.switch_to.frame(frame)
 
-        for div in driver.find_elements(by=By.XPATH, value='//div[@class = "spotlist__itemtitle"]'):
-            result["spots"].append(div.text)
-            print(result["name"], div.text)
+        for ids in call_repeat(partial(pickup_spot_ids, driver, spot_ids)):
+            if len(ids) == CATEGORY_LENGTH[result["id"]]:
+                break
+
+        result["spot_ids"][:] = ids
 
     match category["shapes"]:
         case (shape,):
             result["course"] = Course(name=shape["name"], description=shape["description"])
 
     return result
+
+
+def call_repeat(
+    f: Callable[[], _T1], repeat: int = REPEAT, interval: float = INTERVAL
+) -> Generator[_T1, None, None]:
+    yield f()
+    for _ in range(repeat - 1):
+        sleep(interval)
+        yield f()
+
+
+def pickup_spot_ids(driver: WebDriver, spot_ids: Mapping[str, SpotID]) -> list[SpotID]:
+    return [
+        spot_ids[div.text]
+        for div in driver.find_elements(by=By.XPATH, value='//div[@class = "spotlist__itemtitle"]')
+    ]
