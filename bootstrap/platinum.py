@@ -17,7 +17,7 @@ from tqdm import tqdm
 
 from gobo.types import CategoryID
 
-from .types import Spot
+from .types import Category, Spot
 
 
 class BootOption(TypedDict):
@@ -144,3 +144,7 @@ def _get_spot(driver: WebDriver, spot: StampRallySpot) -> Spot:
             break
 
     return result
+
+
+async def get_categories(drivers: Collection[WebDriver], boot_option: BootOption) -> list[Category]:
+    return []
