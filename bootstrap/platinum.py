@@ -121,10 +121,12 @@ async def get_spots(drivers: Collection[WebDriver], boot_option: BootOption) -> 
 
 
 async def get_categories(drivers: Collection[WebDriver], boot_option: BootOption) -> list[Category]:
-    spot_ids = {spot["spotTitle"]: spot["spotId"] for spot in boot_option["stampRallySpots"]}
+    spot_name_to_id = {spot["spotTitle"]: spot["spotId"] for spot in boot_option["stampRallySpots"]}
 
     return sorted(
-        await _get_categories(drivers, boot_option["mapCategories"], spot_ids=spot_ids),
+        await _get_categories(
+            drivers, boot_option["mapCategories"], spot_name_to_id=spot_name_to_id
+        ),
         key=itemgetter("id"),
     )
 
@@ -227,7 +229,7 @@ def _get_spots(driver: WebDriver, spot: StampRallySpot) -> Spot:
 
 @vectorize
 def _get_categories(
-    driver: WebDriver, category: MapCategory, spot_ids: Mapping[str, SpotID]
+    driver: WebDriver, category: MapCategory, spot_name_to_id: Mapping[str, SpotID]
 ) -> Category:
     result = Category(
         id=category["categoryId"],
@@ -236,16 +238,18 @@ def _get_categories(
         ref=category["mapCategoryGroup"],
         spot_ids=[],
     )
+    spot_ids = result["spot_ids"]
 
     driver.get(f"https://platinumaps.jp/d/gogo-boso?c={result['ref']}&list=1")
     for frame in driver.find_elements(by=By.XPATH, value="//iframe"):
         driver.switch_to.frame(frame)
 
-        for ids in call_repeat(partial(pickup_spot_ids, driver, spot_ids)):
-            if len(ids) == CATEGORY_LENGTH[result["id"]]:
-                break
+        for new_ids in call_repeat(partial(pickup_spot_ids, driver, spot_name_to_id)):
+            for id in new_ids:
+                spot_ids.append(id)
 
-        result["spot_ids"][:] = ids
+            if len(spot_ids) == CATEGORY_LENGTH[result["id"]]:
+                break
 
     match category["shapes"]:
         case (shape,):
@@ -263,8 +267,8 @@ def call_repeat(
         yield f()
 
 
-def pickup_spot_ids(driver: WebDriver, spot_ids: Mapping[str, SpotID]) -> list[SpotID]:
+def pickup_spot_ids(driver: WebDriver, spot_name_to_id: Mapping[str, SpotID]) -> list[SpotID]:
     return [
-        spot_ids[div.text]
+        spot_name_to_id[div.text]
         for div in driver.find_elements(by=By.XPATH, value='//div[@class = "spotlist__itemtitle"]')
     ]
