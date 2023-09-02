@@ -1,8 +1,9 @@
 import json
 import sys
-from asyncio import run
-from collections.abc import Callable, Coroutine, Generator
-from contextlib import AsyncExitStack, ExitStack, contextmanager
+from asyncio import gather, get_running_loop, run
+from collections.abc import AsyncGenerator, Callable, Coroutine, Generator
+from concurrent.futures import ThreadPoolExecutor as Executor
+from contextlib import AsyncExitStack, ExitStack, asynccontextmanager, contextmanager
 from functools import wraps
 from pathlib import Path
 from sqlite3 import connect
@@ -37,7 +38,7 @@ def main() -> None:
 @click.option("-o", "--output", type=click.File("w", encoding="utf-8"), default=sys.stdout)
 @click.option("--indent", type=int, default=2)
 def boot_option_command(output: IO[str], indent: int | None) -> None:
-    with open_chrome_driver() as driver:
+    with _open_chrome_driver() as driver:
         (boot_option,) = platinum.find_boot_options(driver)
     json.dump(boot_option, output, indent=indent, ensure_ascii=False)
 
@@ -57,7 +58,7 @@ async def spot_command(
     boot_option = cast(platinum.BootOption, json.load(boot_option_json))
 
     with ExitStack() as stack:
-        drivers = [stack.enter_context(open_chrome_driver()) for _ in range(max(1, j))]
+        drivers = [stack.enter_context(_open_chrome_driver()) for _ in range(max(1, j))]
         spots = await platinum.get_spots(drivers, boot_option)
 
     json.dump(spots, output, indent=indent, ensure_ascii=False)
@@ -78,7 +79,7 @@ async def category_command(
     boot_option = cast(platinum.BootOption, json.load(boot_option_json))
 
     with ExitStack() as stack:
-        drivers = [stack.enter_context(open_chrome_driver()) for _ in range(max(1, j))]
+        drivers = [stack.enter_context(_open_chrome_driver()) for _ in range(max(1, j))]
         categories = await platinum.get_categories(drivers, boot_option)
 
     json.dump(categories, output, indent=indent, ensure_ascii=False)
@@ -131,20 +132,40 @@ async def database_bak(output: IO[str], cache_path: Path) -> None:
 
 
 @contextmanager
-def open_chrome_driver() -> Generator[webdriver.Chrome, None, None]:
+def _open_chrome_driver(headless: bool = False) -> Generator[webdriver.Chrome, None, None]:
+    driver = _get_chrome_driver(headless=headless)
+    try:
+        yield driver
+    finally:
+        driver.close()
+
+
+@asynccontextmanager
+async def _aopen_chrome_drivers(
+    n: int, headless: bool = False
+) -> AsyncGenerator[list[webdriver.Chrome], None]:
+    loop = get_running_loop()
+    with Executor(n) as executor:
+        drivers = await gather(
+            *(loop.run_in_executor(executor, _get_chrome_driver, headless) for _ in range(n))
+        )
+        try:
+            yield drivers
+        finally:
+            await gather(*(loop.run_in_executor(executor, driver.close) for driver in drivers))
+
+
+def _get_chrome_driver(headless: bool) -> webdriver.Chrome:
     options = webdriver.ChromeOptions()
 
-    # options.add_argument("--headless")  # type: ignore
+    if headless:
+        options.add_argument("--headless")  # type: ignore
 
     # 日本語指定しておく
     options.add_argument("--lang=ja-JP")  # type: ignore
     options.add_experimental_option("prefs", {"intl.accept_languages": "ja"})
 
-    driver = webdriver.Chrome(options=options)
-    try:
-        yield driver
-    finally:
-        driver.close()
+    return webdriver.Chrome(options=options)
 
 
 if __name__ == "__main__":
