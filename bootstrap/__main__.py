@@ -3,7 +3,7 @@ import sys
 from asyncio import gather, get_running_loop, run
 from collections.abc import AsyncGenerator, Callable, Coroutine, Generator
 from concurrent.futures import ThreadPoolExecutor as Executor
-from contextlib import AsyncExitStack, ExitStack, asynccontextmanager, contextmanager
+from contextlib import AsyncExitStack, asynccontextmanager, contextmanager
 from functools import wraps
 from pathlib import Path
 from sqlite3 import connect
@@ -57,8 +57,7 @@ async def spot_command(
 ) -> None:
     boot_option = cast(platinum.BootOption, json.load(boot_option_json))
 
-    with ExitStack() as stack:
-        drivers = [stack.enter_context(_open_chrome_driver()) for _ in range(max(1, j))]
+    async with _aopen_chrome_drivers(max(1, j), headless=False) as drivers:
         spots = await platinum.get_spots(drivers, boot_option)
 
     json.dump(spots, output, indent=indent, ensure_ascii=False)
@@ -78,8 +77,7 @@ async def category_command(
 ) -> None:
     boot_option = cast(platinum.BootOption, json.load(boot_option_json))
 
-    with ExitStack() as stack:
-        drivers = [stack.enter_context(_open_chrome_driver()) for _ in range(max(1, j))]
+    async with _aopen_chrome_drivers(max(1, j), headless=False) as drivers:
         categories = await platinum.get_categories(drivers, boot_option)
 
     json.dump(categories, output, indent=indent, ensure_ascii=False)
