@@ -23,6 +23,25 @@ from .types import Category, Course, Spot
 _T1 = TypeVar("_T1")
 _T2 = TypeVar("_T2")
 
+NO_URL_SPOTS = {
+    208399,
+    208417,
+    208428,
+    208448,
+    208449,
+    208470,
+    208478,
+    208495,
+    208496,
+    208568,
+    208581,
+    208615,
+    208616,
+    208639,
+    208642,
+    208663,
+}
+
 
 class BootOption(TypedDict):
     mapCategories: list[MapCategory]
@@ -124,32 +143,7 @@ def _get_spots(driver: WebDriver, spot: StampRallySpot) -> Spot:
                             assert href is not None
                             result["uri"] = href
 
-            if (
-                True
-                and "address" in result
-                and (
-                    "uri" in result
-                    or spot["spotId"]
-                    in {
-                        208399,
-                        208417,
-                        208428,
-                        208448,
-                        208449,
-                        208470,
-                        208478,
-                        208495,
-                        208496,
-                        208568,
-                        208581,
-                        208615,
-                        208616,
-                        208639,
-                        208642,
-                        208663,
-                    }
-                )
-            ):
+            if True and "address" in result and ("uri" in result or spot["spotId"] in NO_URL_SPOTS):
                 break
 
             if i <= 30:
