@@ -6,6 +6,7 @@ from asyncio import gather, get_running_loop
 from collections.abc import Callable, Collection, Coroutine, Generator, Iterable
 from concurrent.futures import ThreadPoolExecutor as Executor
 from itertools import chain, count, product
+from operator import itemgetter
 from time import sleep
 from typing import TypedDict, TypeVar, cast
 
@@ -54,8 +55,13 @@ def find_boot_options(driver: WebDriver) -> Generator[BootOption, None, None]:
 
 
 async def get_spots(drivers: Collection[WebDriver], boot_option: BootOption) -> list[Spot]:
-    spots = await _get_spots(drivers, boot_option["stampRallySpots"])
-    return sorted(spots, key=lambda spot: spot["id"])
+    return sorted(await _get_spots(drivers, boot_option["stampRallySpots"]), key=itemgetter("id"))
+
+
+async def get_categories(drivers: Collection[WebDriver], boot_option: BootOption) -> list[Category]:
+    return sorted(
+        await _get_categories(drivers, boot_option["mapCategories"]), key=itemgetter("id")
+    )
 
 
 def _find_boot_options_from_frame(document: _Element) -> Generator[BootOption, None, None]:
@@ -156,5 +162,12 @@ def _get_spots(driver: WebDriver, spot: StampRallySpot) -> Spot:
     return result
 
 
-async def get_categories(drivers: Collection[WebDriver], boot_option: BootOption) -> list[Category]:
-    return []
+@vectorize
+def _get_categories(driver: WebDriver, category: MapCategory) -> Category:
+    result = Category(
+        id=category["categoryId"],
+        parent_id=category["parentCategoryId"],
+        name=category["categoryName"],
+        ref=category["mapCategoryGroup"],
+    )
+    return result
