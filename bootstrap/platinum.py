@@ -5,10 +5,11 @@ import re
 from asyncio import gather, get_running_loop
 from collections.abc import Callable, Collection, Coroutine, Generator, Iterable
 from concurrent.futures import ThreadPoolExecutor as Executor
+from functools import partial
 from itertools import chain, count, product
 from operator import itemgetter
 from time import sleep
-from typing import TypedDict, TypeVar, cast
+from typing import Concatenate, ParamSpec, TypedDict, TypeVar, cast
 
 from lxml import html
 from lxml.etree import _Element
@@ -20,6 +21,7 @@ from gobo.types import CategoryID
 
 from .types import Category, Course, Spot
 
+_P = ParamSpec("_P")
 _T1 = TypeVar("_T1")
 _T2 = TypeVar("_T2")
 
@@ -93,16 +95,39 @@ def _find_boot_options_from_frame(document: _Element) -> Generator[BootOption, N
 
 
 def vectorize(
-    f: Callable[[WebDriver, _T1], _T2]
-) -> Callable[[Collection[WebDriver], Iterable[_T1]], Coroutine[None, None, list[_T2]]]:
-    async def vectorized(drivers: Collection[WebDriver], iterable: Iterable[_T1]) -> list[_T2]:
+    f: Callable[
+        Concatenate[
+            WebDriver,
+            _T1,
+            _P,
+        ],
+        _T2,
+    ]
+) -> Callable[
+    Concatenate[
+        Collection[WebDriver],
+        Iterable[_T1],
+        _P,
+    ],
+    Coroutine[None, None, list[_T2]],
+]:
+    async def vectorized(
+        drivers: Collection[WebDriver],
+        iterable: Iterable[_T1],
+        /,
+        *args: _P.args,
+        **kwargs: _P.kwargs,
+    ) -> list[_T2]:
         loop = get_running_loop()
         iterator = iter(tqdm(iterable))
 
         with Executor(len(drivers)) as executor:
 
             async def vectorized(driver: WebDriver) -> list[_T2]:
-                return [await loop.run_in_executor(executor, f, driver, item) for item in iterator]
+                return [
+                    await loop.run_in_executor(executor, partial(f, driver, item, *args, **kwargs))
+                    for item in iterator
+                ]
 
             results = await gather(*(vectorized(driver) for driver in drivers))
 
