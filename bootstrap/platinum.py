@@ -18,7 +18,7 @@ from tqdm import tqdm
 
 from gobo.types import CategoryID
 
-from .types import Category, Spot
+from .types import Category, Course, Spot
 
 _T1 = TypeVar("_T1")
 _T2 = TypeVar("_T2")
@@ -170,4 +170,9 @@ def _get_categories(driver: WebDriver, category: MapCategory) -> Category:
         name=category["categoryName"],
         ref=category["mapCategoryGroup"],
     )
+
+    match category["shapes"]:
+        case (shape,):
+            result["course"] = Course(name=shape["name"], description=shape["description"])
+
     return result
