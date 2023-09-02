@@ -169,7 +169,16 @@ def _get_categories(driver: WebDriver, category: MapCategory) -> Category:
         parent_id=category["parentCategoryId"],
         name=category["categoryName"],
         ref=category["mapCategoryGroup"],
+        spots=[],
     )
+
+    driver.get(f"https://platinumaps.jp/d/gogo-boso?c={result['ref']}&list=1")
+    for frame in driver.find_elements(by=By.XPATH, value="//iframe"):
+        driver.switch_to.frame(frame)
+
+        for div in driver.find_elements(by=By.XPATH, value='//div[@class = "spotlist__itemtitle"]'):
+            result["spots"].append(div.text)
+            print(result["name"], div.text)
 
     match category["shapes"]:
         case (shape,):

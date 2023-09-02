@@ -13,6 +13,7 @@ class Category(TypedDict):
     parent_id: CategoryID
     name: str
     ref: str
+    spots: list[str]
     course: NotRequired[Course]
 
 
