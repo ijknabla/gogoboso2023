@@ -53,6 +53,11 @@ def find_boot_options(driver: WebDriver) -> Generator[BootOption, None, None]:
         yield from _find_boot_options_from_frame(html.fromstring(driver.page_source))
 
 
+async def get_spots(drivers: Collection[WebDriver], boot_option: BootOption) -> list[Spot]:
+    spots = await _get_spots(drivers, boot_option["stampRallySpots"])
+    return sorted(spots, key=lambda spot: spot["id"])
+
+
 def _find_boot_options_from_frame(document: _Element) -> Generator[BootOption, None, None]:
     pattern = re.compile(r"window\.__bootOptions\s*=\s*(?P<json>.*?);")
     text: str
@@ -81,25 +86,8 @@ def vectorize(
     return vectorized
 
 
-async def get_spots(drivers: Collection[WebDriver], boot_option: BootOption) -> list[Spot]:
-    iterator = iter(tqdm(boot_option["stampRallySpots"]))
-
-    with Executor(len(drivers)) as executor:
-        spots: list[Spot] = sum(
-            await gather(*(_each_get_spots(executor, driver, iterator) for driver in drivers)), []
-        )
-
-    return sorted(spots, key=lambda spot: spot["id"])
-
-
-async def _each_get_spots(
-    executor: Executor, driver: WebDriver, spots: Iterable[StampRallySpot]
-) -> list[Spot]:
-    loop = get_running_loop()
-    return [await loop.run_in_executor(executor, _get_spot, driver, spot) for spot in spots]
-
-
-def _get_spot(driver: WebDriver, spot: StampRallySpot) -> Spot:
+@vectorize
+def _get_spots(driver: WebDriver, spot: StampRallySpot) -> Spot:
     result = cast(
         Spot,
         {
