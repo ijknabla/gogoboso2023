@@ -58,9 +58,9 @@ async def spot_command(
 
     with ExitStack() as stack:
         drivers = [stack.enter_context(open_chrome_driver()) for _ in range(max(1, j))]
-        data = await platinum.get_spots(drivers, boot_option)
+        spots = await platinum.get_spots(drivers, boot_option)
 
-    json.dump(data, output, indent=indent, ensure_ascii=False)
+    json.dump(spots, output, indent=indent, ensure_ascii=False)
 
 
 @main.command

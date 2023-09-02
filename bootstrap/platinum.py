@@ -50,6 +50,15 @@ def find_boot_options(driver: WebDriver) -> Generator[BootOption, None, None]:
         yield from _find_boot_options_from_frame(html.fromstring(driver.page_source))
 
 
+def _find_boot_options_from_frame(document: _Element) -> Generator[BootOption, None, None]:
+    pattern = re.compile(r"window\.__bootOptions\s*=\s*(?P<json>.*?);")
+    text: str
+    for text in document.xpath("//script/text()"):  # type: ignore
+        searched = pattern.search(text)
+        if searched is not None:
+            yield cast(BootOption, json.loads(searched.group("json")))
+
+
 async def get_spots(drivers: Collection[WebDriver], boot_option: BootOption) -> list[Spot]:
     iterator = iter(tqdm(boot_option["stampRallySpots"]))
 
@@ -135,12 +144,3 @@ def _get_spot(driver: WebDriver, spot: StampRallySpot) -> Spot:
             break
 
     return result
-
-
-def _find_boot_options_from_frame(document: _Element) -> Generator[BootOption, None, None]:
-    pattern = re.compile(r"window\.__bootOptions\s*=\s*(?P<json>.*?);")
-    text: str
-    for text in document.xpath("//script/text()"):  # type: ignore
-        searched = pattern.search(text)
-        if searched is not None:
-            yield cast(BootOption, json.loads(searched.group("json")))
