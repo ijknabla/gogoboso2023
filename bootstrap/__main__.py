@@ -11,7 +11,7 @@ from typing import IO, Any, ParamSpec, TypeVar, cast
 import click
 from selenium import webdriver
 
-from . import area, platinum, spot, types
+from . import area, category, platinum, spot, types
 from .types import BootOption
 
 P = ParamSpec("P")
@@ -95,12 +95,13 @@ async def database(
 ) -> None:
     boot = cast(BootOption, json.load(boot_json))
     spots = cast(list[types.Spot], json.load(spot_json))
-    # categories = cast(list[types.Category], json.load(category_json))
+    categories = cast(list[types.Category], json.load(category_json))
 
     with connect(":memory:") as connection:
         cursor = connection.cursor()
         area.create_and_insert(cursor, boot)
         spot.create_and_insert(cursor, spots)
+        category.create_and_insert(cursor, categories)
 
         for sql in connection.iterdump():
             print(sql, file=output_file)
