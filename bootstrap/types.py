@@ -25,5 +25,8 @@ class Course(TypedDict):
 class Spot(TypedDict):
     id: SpotID
     name: str
+    subtitle: NotRequired[str]
+    description: str
     address: str
-    uri: NotRequired[str]
+    googlemap_uri: str
+    link_uri: NotRequired[str]

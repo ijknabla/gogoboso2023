@@ -7,7 +7,7 @@ from collections.abc import Callable, Collection, Coroutine, Generator, Iterable
 from concurrent.futures import ThreadPoolExecutor as Executor
 from contextlib import AbstractContextManager
 from functools import partial
-from itertools import chain, count, product
+from itertools import chain, product
 from operator import itemgetter
 from time import sleep
 from typing import Concatenate, ParamSpec, TypedDict, TypeVar, cast
@@ -31,7 +31,45 @@ _T3 = TypeVar("_T3")
 INTERVAL = 1.0
 REPEAT = 30
 
-NO_URL_SPOTS = {
+MISISNG_SPOTS = [
+    209076,
+    209077,
+    209078,
+    209079,
+    209080,
+    209081,
+    209082,
+    209083,
+    209084,
+    209085,
+    209086,
+    209087,
+    209088,
+    209089,
+    209090,
+    209091,
+]
+
+NO_SUBTITLE_SPOTS = {
+    209076,
+    209077,
+    209078,
+    209079,
+    209080,
+    209081,
+    209082,
+    209083,
+    209084,
+    209085,
+    209086,
+    209087,
+    209088,
+    209089,
+    209090,
+    209091,
+}
+
+NO_LINK_URL_SPOTS = {
     208399,
     208417,
     208428,
@@ -48,6 +86,7 @@ NO_URL_SPOTS = {
     208639,
     208642,
     208663,
+    209089,
 }
 
 CATEGORY_LENGTH = {
@@ -128,7 +167,11 @@ def find_boot_options(driver: WebDriver) -> Generator[BootOption, None, None]:
 
 
 async def get_spots(drivers: Collection[WebDriver], boot_option: BootOption) -> list[Spot]:
-    return sorted(await _get_spots(drivers, boot_option["stampRallySpots"]), key=itemgetter("id"))
+    spot_ids = sorted(
+        set(chain(map(itemgetter("spotId"), boot_option["stampRallySpots"]), MISISNG_SPOTS))
+    )
+
+    return sorted(await _get_spot(drivers, spot_ids), key=itemgetter("id"))
 
 
 async def get_categories(
@@ -195,48 +238,69 @@ def vectorize(
 
 
 @vectorize
-def _get_spots(driver: WebDriver, spot: StampRallySpot) -> Spot:
-    result = cast(
-        Spot,
-        {
-            "id": spot["spotId"],
-            "name": spot["spotTitle"],
-        },
-    )
-
-    driver.get(f"https://platinumaps.jp/d/gogo-boso?s={result['id']}")
+def _get_spot(
+    driver: WebDriver,
+    id: SpotID,
+    repeat: int = REPEAT,
+    interval: float = INTERVAL,
+) -> Spot:
+    driver.get(f"https://platinumaps.jp/d/gogo-boso?s={id}")
     for frame in driver.find_elements(by=By.XPATH, value="//iframe"):
         driver.switch_to.frame(frame)
 
-        for i in count(1):
-            for tr in driver.find_elements(
-                by=By.XPATH, value='//tr[@class = "poiproperties__item"]'
-            ):
-                for itemlabel, a in product(
-                    tr.find_elements(
-                        by=By.XPATH, value='child::th[@class = "poiproperties__itemlabel"]'
-                    ),
-                    tr.find_elements(by=By.XPATH, value="descendant::a"),
-                ):
-                    match itemlabel.text:
-                        case "住所":
-                            result["address"] = a.text
-                        case "URL":
-                            href = a.get_attribute("href")
-                            assert href is not None
-                            result["uri"] = href
+        required = set(Spot.__annotations__)
 
-            if True and "address" in result and ("uri" in result or spot["spotId"] in NO_URL_SPOTS):
+        if id in NO_SUBTITLE_SPOTS:
+            required.remove("subtitle")
+        if id in NO_LINK_URL_SPOTS:
+            required.remove("link_uri")
+
+        for _ in range(repeat):
+            spot = _pickup_spot_id(driver, id)
+
+            if required <= set(spot):
                 break
 
-            if i <= 30:
-                sleep(1)
-                continue
-
+            sleep(interval)
+        else:
             print(driver.current_url)
-            break
 
-    return result
+    return spot
+
+
+def _pickup_spot_id(driver: WebDriver, id: SpotID) -> Spot:
+    spot = cast(Spot, {"id": id})
+
+    for div in driver.find_elements(by=By.XPATH, value='//div[@class = "detail__title"]'):
+        spot["name"] = div.text
+
+    for div in driver.find_elements(by=By.XPATH, value='//div[@class = "detail__subtitletext"]'):
+        spot["subtitle"] = div.text
+
+    for div in driver.find_elements(
+        by=By.XPATH, value='//div[@class = "ptmdescription__text"]/div[1]'
+    ):
+        spot["description"] = div.text
+
+    for tr in driver.find_elements(by=By.XPATH, value='//tr[@class = "poiproperties__item"]'):
+        for label, a in product(
+            tr.find_elements(by=By.XPATH, value='child::th[@class = "poiproperties__itemlabel"]'),
+            tr.find_elements(by=By.XPATH, value="descendant::a"),
+        ):
+            match label.text:
+                case "住所":
+                    spot["address"] = a.text
+                    href = a.get_attribute("href")
+                    assert href is not None
+                    spot["googlemap_uri"] = href
+                case "URL":
+                    href = a.get_attribute("href")
+                    assert href is not None
+                    spot["link_uri"] = href
+
+    return cast(
+        Spot, dict(sorted(spot.items(), key=lambda kv: list(Spot.__annotations__).index(kv[0])))
+    )
 
 
 @vectorize
@@ -266,7 +330,7 @@ def _get_category(
             driver.switch_to.frame(frame)
 
             for i in range(repeat):
-                spot_ids[:] = pickup_spot_ids(driver)
+                spot_ids[:] = _pickup_spot_ids(driver)
 
                 if len(spot_ids) >= expected_spot_ids_length:
                     break
@@ -284,7 +348,7 @@ def _get_category(
     return result
 
 
-def pickup_spot_ids(driver: WebDriver) -> list[SpotID]:
+def _pickup_spot_ids(driver: WebDriver) -> list[SpotID]:
     result: dict[int, SpotID] = {}
     for div in driver.find_elements(
         by=By.XPATH,
