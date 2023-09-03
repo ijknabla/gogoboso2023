@@ -1,17 +1,69 @@
 BEGIN TRANSACTION;
 CREATE TABLE area_names
 (
-    area_id INTEGER NOT NULL,
-    notation_id INTEGER NOT NULL,
-    area_name TEXT UNIQUE NOT NULL,
-    PRIMARY KEY(area_id, notation_id)
+    area_id INTEGER PRIMARY KEY,
+    area_name TEXT UNIQUE NOT NULL
 );
-INSERT INTO "area_names" VALUES(1,0,'ベイエリア');
-INSERT INTO "area_names" VALUES(2,0,'東葛飾エリア');
-INSERT INTO "area_names" VALUES(3,0,'北総エリア');
-INSERT INTO "area_names" VALUES(4,0,'九十九里エリア');
-INSERT INTO "area_names" VALUES(5,0,'南房総エリア');
-INSERT INTO "area_names" VALUES(6,0,'かずさ・臨海エリア');
+INSERT INTO "area_names" VALUES(121002,'千葉市');
+INSERT INTO "area_names" VALUES(121011,'中央区');
+INSERT INTO "area_names" VALUES(121029,'花見川区');
+INSERT INTO "area_names" VALUES(121037,'稲毛区');
+INSERT INTO "area_names" VALUES(121045,'若葉区');
+INSERT INTO "area_names" VALUES(121053,'緑区');
+INSERT INTO "area_names" VALUES(121061,'美浜区');
+INSERT INTO "area_names" VALUES(122025,'銚子市');
+INSERT INTO "area_names" VALUES(122033,'市川市');
+INSERT INTO "area_names" VALUES(122041,'船橋市');
+INSERT INTO "area_names" VALUES(122050,'館山市');
+INSERT INTO "area_names" VALUES(122068,'木更津市');
+INSERT INTO "area_names" VALUES(122076,'松戸市');
+INSERT INTO "area_names" VALUES(122084,'野田市');
+INSERT INTO "area_names" VALUES(122106,'茂原市');
+INSERT INTO "area_names" VALUES(122114,'成田市');
+INSERT INTO "area_names" VALUES(122122,'佐倉市');
+INSERT INTO "area_names" VALUES(122131,'東金市');
+INSERT INTO "area_names" VALUES(122157,'旭市');
+INSERT INTO "area_names" VALUES(122165,'習志野市');
+INSERT INTO "area_names" VALUES(122173,'柏市');
+INSERT INTO "area_names" VALUES(122181,'勝浦市');
+INSERT INTO "area_names" VALUES(122190,'市原市');
+INSERT INTO "area_names" VALUES(122203,'流山市');
+INSERT INTO "area_names" VALUES(122211,'八千代市');
+INSERT INTO "area_names" VALUES(122220,'我孫子市');
+INSERT INTO "area_names" VALUES(122238,'鴨川市');
+INSERT INTO "area_names" VALUES(122246,'鎌ケ谷市');
+INSERT INTO "area_names" VALUES(122254,'君津市');
+INSERT INTO "area_names" VALUES(122262,'富津市');
+INSERT INTO "area_names" VALUES(122271,'浦安市');
+INSERT INTO "area_names" VALUES(122289,'四街道市');
+INSERT INTO "area_names" VALUES(122297,'袖ヶ浦市');
+INSERT INTO "area_names" VALUES(122301,'八街市');
+INSERT INTO "area_names" VALUES(122319,'印西市');
+INSERT INTO "area_names" VALUES(122327,'白井市');
+INSERT INTO "area_names" VALUES(122335,'富里市');
+INSERT INTO "area_names" VALUES(122343,'南房総市');
+INSERT INTO "area_names" VALUES(122351,'匝瑳市');
+INSERT INTO "area_names" VALUES(122360,'香取市');
+INSERT INTO "area_names" VALUES(122378,'山武市');
+INSERT INTO "area_names" VALUES(122386,'いすみ市');
+INSERT INTO "area_names" VALUES(122394,'大網白里市');
+INSERT INTO "area_names" VALUES(123226,'酒々井町');
+INSERT INTO "area_names" VALUES(123293,'栄町');
+INSERT INTO "area_names" VALUES(123421,'神崎町');
+INSERT INTO "area_names" VALUES(123471,'多古町');
+INSERT INTO "area_names" VALUES(123498,'東庄町');
+INSERT INTO "area_names" VALUES(124036,'九十九里町');
+INSERT INTO "area_names" VALUES(124095,'芝山町');
+INSERT INTO "area_names" VALUES(124109,'横芝光町');
+INSERT INTO "area_names" VALUES(124214,'一宮町');
+INSERT INTO "area_names" VALUES(124222,'睦沢町');
+INSERT INTO "area_names" VALUES(124231,'長生村');
+INSERT INTO "area_names" VALUES(124249,'白子町');
+INSERT INTO "area_names" VALUES(124265,'長柄町');
+INSERT INTO "area_names" VALUES(124273,'長南町');
+INSERT INTO "area_names" VALUES(124419,'大多喜町');
+INSERT INTO "area_names" VALUES(124435,'御宿町');
+INSERT INTO "area_names" VALUES(124630,'鋸南町');
 CREATE TABLE municipality_list
 (
     `index` INTEGER PRIMARY KEY,
