@@ -93,13 +93,13 @@ async def database(
     category_json: IO[str],
     output_file: IO[str],
 ) -> None:
-    # boot = cast(BootOption, json.load(boot_json))
+    boot = cast(BootOption, json.load(boot_json))
     spots = cast(list[types.Spot], json.load(spot_json))
     # categories = cast(list[types.Category], json.load(category_json))
 
     with connect(":memory:") as connection:
         cursor = connection.cursor()
-        area.create_and_insert(cursor)
+        area.create_and_insert(cursor, boot)
         spot.create_and_insert(cursor, spots)
 
         for sql in connection.iterdump():
