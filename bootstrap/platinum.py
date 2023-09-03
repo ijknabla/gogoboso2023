@@ -285,13 +285,16 @@ def _get_category(
 
 
 def pickup_spot_ids(driver: WebDriver) -> list[SpotID]:
-    result = []
+    result: dict[int, SpotID] = {}
     for div in driver.find_elements(
         by=By.XPATH,
         value="//div[@data-cell-index and @data-spot-id]",
     ):
         div.id
+        data_cell_index = div.get_attribute("data-cell-index")
         data_spot_id = div.get_attribute("data-spot-id")
-        assert data_spot_id is not None
-        result.append(SpotID(int(data_spot_id)))
-    return result
+        assert data_spot_id is not None and data_cell_index is not None
+
+        result[int(data_cell_index)] = SpotID(int(data_spot_id))
+
+    return [v for _, v in sorted(result.items())]
