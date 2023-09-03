@@ -10,6 +10,7 @@ if TYPE_CHECKING:
 
 class BootOption(TypedDict):
     mapCategories: list[MapCategory]
+    stampRallies: list[StampRally]
     stampRallySpots: list[StampRallySpot]
 
 
@@ -24,6 +25,15 @@ class MapCategory(TypedDict):
 class Shape(TypedDict):
     description: str
     name: str
+
+
+class StampRally(TypedDict):
+    subAreaCodes: list[SubAreaCode]
+
+
+class SubAreaCode(TypedDict):
+    Value: str
+    Text: str
 
 
 class StampRallySpot(TypedDict):
