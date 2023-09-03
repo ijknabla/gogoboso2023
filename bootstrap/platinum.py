@@ -11,6 +11,7 @@ from itertools import chain, count, product
 from operator import itemgetter
 from time import sleep
 from typing import Concatenate, ParamSpec, TypedDict, TypeVar, cast
+from warnings import warn
 
 from lxml import html
 from lxml.etree import _Element
@@ -49,9 +50,9 @@ NO_URL_SPOTS = {
 }
 
 CATEGORY_LENGTH = {
-    19016: 486,
-    19018: 13,
-    19025: 473,
+    19016: 491,
+    19018: 17,
+    19025: 490,
     19028: 15,
     19167: 5,
     19168: 4,
@@ -85,6 +86,10 @@ CATEGORY_LENGTH = {
     20197: 5,
     20482: 5,
 }
+
+
+class CategoryLengthMismatch(Warning):
+    ...
 
 
 class BootOption(TypedDict):
@@ -137,6 +142,8 @@ def get_categories2(
             )
             spot_ids = result["spot_ids"]
 
+            expected_length = CATEGORY_LENGTH[result["id"]]
+
             driver.get(f"https://platinumaps.jp/d/gogo-boso?c={result['ref']}&list=1")
 
             width, height = driver.get_window_size().values()
@@ -147,16 +154,18 @@ def get_categories2(
                 for i, new_ids in enumerate(
                     call_repeat(partial(pickup_spot_ids, driver, spot_name_to_id)), start=1
                 ):
-                    for id in new_ids:
-                        if id not in spot_ids:
-                            spot_ids.append(id)
+                    spot_ids[:] = new_ids
 
-                    if len(spot_ids) == CATEGORY_LENGTH[result["id"]]:
+                    if len(new_ids) >= expected_length:
                         break
 
                     driver.set_window_size(width, height * 2**i)
 
-                print(result["id"], len(spot_ids))
+                spot_ids[:] = new_ids
+
+                if expected_length != len(spot_ids):
+                    warn(CategoryLengthMismatch(result["id"], len(spot_ids), expected_length))
+                    print(result["id"], CATEGORY_LENGTH[result["id"]], len(spot_ids))
 
 
 async def get_categories(drivers: Collection[WebDriver], boot_option: BootOption) -> list[Category]:
@@ -317,9 +326,12 @@ def call_repeat(
 
 def pickup_spot_ids(driver: WebDriver, spot_name_to_id: Mapping[str, SpotID]) -> list[SpotID]:
     result = []
-    for div in driver.find_elements(by=By.XPATH, value='//div[@class = "spotlist__itemtitle"]'):
-        try:
-            result.append(spot_name_to_id[div.text])
-        except KeyError:
-            print(div.text, "missing")
+    for div in driver.find_elements(
+        by=By.XPATH,
+        value="//div[@data-cell-index and @data-spot-id]",
+    ):
+        div.id
+        data_spot_id = div.get_attribute("data-spot-id")
+        assert data_spot_id is not None
+        result.append(SpotID(int(data_spot_id)))
     return result
