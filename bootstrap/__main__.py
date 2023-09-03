@@ -3,19 +3,15 @@ import sys
 from asyncio import gather, get_running_loop, run
 from collections.abc import AsyncGenerator, Callable, Coroutine, Generator
 from concurrent.futures import ThreadPoolExecutor as Executor
-from contextlib import AsyncExitStack, asynccontextmanager, contextmanager
+from contextlib import asynccontextmanager, contextmanager
 from functools import wraps
-from pathlib import Path
 from sqlite3 import connect
 from typing import IO, Any, ParamSpec, TypeVar, cast
 
 import click
 from selenium import webdriver
 
-from gobo.types import URI
-
-from . import area, municipality, platinum, spot
-from .cache import Cache
+from . import area, platinum, spot, types
 
 P = ParamSpec("P")
 T = TypeVar("T")
@@ -84,48 +80,29 @@ async def category_command(
 
 @main.command
 @run_decorator
+@click.argument("boot_json", type=click.File("r", encoding="utf-8"))
+@click.argument("spot_json", type=click.File("r", encoding="utf-8"))
+@click.argument("category_json", type=click.File("r", encoding="utf-8"))
 @click.option(
     "-o", "--output", "output_file", type=click.File("w", encoding="utf-8"), default=sys.stdout
 )
-@click.argument("input_file", metavar="JSON", type=click.File("r", encoding="utf-8"))
 async def database(
-    input_file: IO[str],
+    boot_json: IO[str],
+    spot_json: IO[str],
+    category_json: IO[str],
     output_file: IO[str],
 ) -> None:
+    # boot = cast(platinum.BootOption, json.load(boot_json))
+    spots = cast(list[types.Spot], json.load(spot_json))
+    # categories = cast(list[types.Category], json.load(category_json))
+
     with connect(":memory:") as connection:
         cursor = connection.cursor()
         area.create_and_insert(cursor)
-        spot.create_and_insert(cursor)
+        spot.create_and_insert(cursor, spots)
 
         for sql in connection.iterdump():
             print(sql, file=output_file)
-
-
-@main.command
-@run_decorator
-@click.option("-o", "--output", type=click.File("w", encoding="utf-8"), default=sys.stdout)
-@click.option(
-    "--cache-path", type=click.Path(dir_okay=False, path_type=Path), default=Path(".cache.pickle")
-)
-async def database_bak(output: IO[str], cache_path: Path) -> None:
-    async with AsyncExitStack() as stack:
-        enter = stack.enter_context
-        connection = enter(connect(":memory:"))
-
-        cache = enter(Cache(cache_path))
-
-        cursor = connection.cursor()
-        municipality.create_and_insert(
-            cursor,
-            await cache.get_html(
-                URI("http://www.tt.rim.or.jp/~ishato/tiri/code/rireki/12tiba.htm"), "cp932"
-            ),
-        )
-        area.create_and_insert(cursor)
-        spot.create_and_insert(cursor)
-
-        for sql in connection.iterdump():
-            print(sql, file=output)
 
 
 @contextmanager
