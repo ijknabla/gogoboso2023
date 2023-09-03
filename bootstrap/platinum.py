@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import re
 from asyncio import gather, get_running_loop
-from collections.abc import Callable, Collection, Coroutine, Generator, Iterable, Mapping
+from collections.abc import Callable, Collection, Coroutine, Generator, Iterable
 from concurrent.futures import ThreadPoolExecutor as Executor
 from contextlib import AbstractContextManager
 from functools import partial
@@ -93,6 +93,10 @@ class CategoryLengthMismatch(Warning):
     ...
 
 
+class UnableSpot(Warning):
+    ...
+
+
 class BootOption(TypedDict):
     mapCategories: list[MapCategory]
     stampRallySpots: list[StampRallySpot]
@@ -127,57 +131,21 @@ async def get_spots(drivers: Collection[WebDriver], boot_option: BootOption) -> 
     return sorted(await _get_spots(drivers, boot_option["stampRallySpots"]), key=itemgetter("id"))
 
 
-def get_categories2(
-    open_driver: Callable[[], AbstractContextManager[WebDriver]], boot_option: BootOption
-) -> None:
-    spot_name_to_id = {spot["spotTitle"]: spot["spotId"] for spot in boot_option["stampRallySpots"]}
-
-    for category in boot_option["mapCategories"]:
-        with open_driver() as driver:
-            result = Category(
-                id=category["categoryId"],
-                parent_id=category["parentCategoryId"],
-                name=category["categoryName"],
-                ref=category["mapCategoryGroup"],
-                spot_ids=[],
-            )
-            spot_ids = result["spot_ids"]
-
-            expected_length = CATEGORY_LENGTH[result["id"]]
-
-            driver.get(f"https://platinumaps.jp/d/gogo-boso?c={result['ref']}&list=1")
-
-            width, height = driver.get_window_size().values()
-
-            for frame in driver.find_elements(by=By.XPATH, value="//iframe"):
-                driver.switch_to.frame(frame)
-
-                for i, new_ids in enumerate(
-                    call_repeat(partial(pickup_spot_ids, driver, spot_name_to_id)), start=1
-                ):
-                    spot_ids[:] = new_ids
-
-                    if len(new_ids) >= expected_length:
-                        break
-
-                    driver.set_window_size(width, height * 2**i)
-
-                spot_ids[:] = new_ids
-
-                if expected_length != len(spot_ids):
-                    warn(CategoryLengthMismatch(result["id"], len(spot_ids), expected_length))
-                    print(result["id"], CATEGORY_LENGTH[result["id"]], len(spot_ids))
-
-
-async def get_categories(drivers: Collection[WebDriver], boot_option: BootOption) -> list[Category]:
-    spot_name_to_id = {spot["spotTitle"]: spot["spotId"] for spot in boot_option["stampRallySpots"]}
-
-    return sorted(
-        await _get_categories(
-            drivers, boot_option["mapCategories"], spot_name_to_id=spot_name_to_id
-        ),
-        key=itemgetter("id"),
+async def get_categories(
+    open_drivers: Collection[Callable[[], AbstractContextManager[WebDriver]]],
+    boot_option: BootOption,
+) -> list[Category]:
+    result: list[Category]
+    result = sorted(
+        await _get_category(open_drivers, boot_option["mapCategories"]), key=itemgetter("id")
     )
+    for missing in sorted(
+        set(id for c in result for id in c["spot_ids"])
+        - set(s["spotId"] for s in boot_option["stampRallySpots"])
+    ):
+        warn(UnableSpot(missing))
+
+    return result
 
 
 def _find_boot_options_from_frame(document: _Element) -> Generator[BootOption, None, None]:
@@ -272,8 +240,11 @@ def _get_spots(driver: WebDriver, spot: StampRallySpot) -> Spot:
 
 
 @vectorize
-def _get_categories(
-    driver: WebDriver, category: MapCategory, spot_name_to_id: Mapping[str, SpotID]
+def _get_category(
+    open_driver: Callable[[], AbstractContextManager[WebDriver]],
+    category: MapCategory,
+    repeat: int = REPEAT,
+    interval: float = INTERVAL,
 ) -> Category:
     result = Category(
         id=category["categoryId"],
@@ -284,25 +255,27 @@ def _get_categories(
     )
     spot_ids = result["spot_ids"]
 
-    driver.set_window_size(945, 23600)
+    expected_spot_ids_length = CATEGORY_LENGTH[result["id"]]
 
-    driver.get(f"https://platinumaps.jp/d/gogo-boso?c={result['ref']}&list=1")
+    with open_driver() as driver:
+        driver.get(f"https://platinumaps.jp/d/gogo-boso?c={result['ref']}&list=1")
 
-    for frame in driver.find_elements(by=By.XPATH, value="//iframe"):
-        driver.switch_to.frame(frame)
+        width, height = driver.get_window_size().values()
 
-        for i, new_ids in enumerate(call_repeat(partial(pickup_spot_ids, driver, spot_name_to_id))):
-            for id in new_ids:
-                if id not in spot_ids:
-                    spot_ids.append(id)
+        for frame in driver.find_elements(by=By.XPATH, value="//iframe"):
+            driver.switch_to.frame(frame)
 
-            print(result["id"], len(spot_ids))
+            for i in range(repeat):
+                spot_ids[:] = pickup_spot_ids(driver)
 
-            if CATEGORY_LENGTH[result["id"]] == 999:
-                print(result["id"], driver.get_window_size(), len(spot_ids))
+                if len(spot_ids) >= expected_spot_ids_length:
+                    break
 
-            if len(spot_ids) == CATEGORY_LENGTH[result["id"]]:
-                break
+                driver.set_window_size(width, height * 2**i)
+                sleep(interval)
+
+            if expected_spot_ids_length != len(spot_ids):
+                warn(CategoryLengthMismatch(result["id"], expected_spot_ids_length, len(spot_ids)))
 
     match category["shapes"]:
         case (shape,):
@@ -311,16 +284,7 @@ def _get_categories(
     return result
 
 
-def call_repeat(
-    f: Callable[[], _T1], repeat: int = REPEAT, interval: float = INTERVAL
-) -> Generator[_T1, None, None]:
-    yield f()
-    for _ in range(repeat - 1):
-        sleep(interval)
-        yield f()
-
-
-def pickup_spot_ids(driver: WebDriver, spot_name_to_id: Mapping[str, SpotID]) -> list[SpotID]:
+def pickup_spot_ids(driver: WebDriver) -> list[SpotID]:
     result = []
     for div in driver.find_elements(
         by=By.XPATH,

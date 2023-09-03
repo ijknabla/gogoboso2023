@@ -67,7 +67,7 @@ async def spot_command(
 @run_decorator
 @click.argument("boot-option-json", type=click.File("r", encoding="utf-8"))
 @click.option("-o", "--output", type=click.File("w", encoding="utf-8"), default=sys.stdout)
-@click.option("-j", type=int, default=4)
+@click.option("-j", type=int, default=2)
 @click.option("--indent", type=int, default=2)
 async def category_command(
     boot_option_json: IO[str],
@@ -77,12 +77,9 @@ async def category_command(
 ) -> None:
     boot_option = cast(platinum.BootOption, json.load(boot_option_json))
 
-    platinum.get_categories2(_open_chrome_driver, boot_option)
+    categories = await platinum.get_categories([_open_chrome_driver] * max(1, j), boot_option)
 
-    # async with _aopen_chrome_drivers(max(1, j), headless=False) as drivers:
-    #     categories = await platinum.get_categories(drivers, boot_option)
-
-    # json.dump(categories, output, indent=indent, ensure_ascii=False)
+    json.dump(categories, output, indent=indent, ensure_ascii=False)
 
 
 @main.command
