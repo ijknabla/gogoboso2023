@@ -10,7 +10,7 @@ from functools import partial
 from itertools import chain, product
 from operator import itemgetter
 from time import sleep
-from typing import Concatenate, ParamSpec, TypedDict, TypeVar, cast
+from typing import Concatenate, ParamSpec, TypeVar, cast
 from warnings import warn
 
 from lxml import html
@@ -19,9 +19,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 from tqdm import tqdm
 
-from gobo.types import CategoryID, SpotID
+from gobo.types import SpotID
 
-from .types import Category, Course, Spot
+from .types import BootOption, Category, Course, MapCategory, Spot
 
 _P = ParamSpec("_P")
 _T1 = TypeVar("_T1")
@@ -134,29 +134,6 @@ class CategoryLengthMismatch(Warning):
 
 class UnableSpot(Warning):
     ...
-
-
-class BootOption(TypedDict):
-    mapCategories: list[MapCategory]
-    stampRallySpots: list[StampRallySpot]
-
-
-class MapCategory(TypedDict):
-    parentCategoryId: CategoryID
-    categoryId: CategoryID
-    shapes: list[Shape]
-    mapCategoryGroup: str
-    categoryName: str
-
-
-class Shape(TypedDict):
-    description: str
-    name: str
-
-
-class StampRallySpot(TypedDict):
-    spotId: SpotID
-    spotTitle: str
 
 
 def find_boot_options(driver: WebDriver) -> Generator[BootOption, None, None]:

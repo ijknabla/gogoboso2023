@@ -12,6 +12,7 @@ import click
 from selenium import webdriver
 
 from . import area, platinum, spot, types
+from .types import BootOption
 
 P = ParamSpec("P")
 T = TypeVar("T")
@@ -51,7 +52,7 @@ async def spot_command(
     indent: int | None,
     j: int,
 ) -> None:
-    boot_option = cast(platinum.BootOption, json.load(boot_option_json))
+    boot_option = cast(BootOption, json.load(boot_option_json))
 
     async with _aopen_chrome_drivers(max(1, j), headless=False) as drivers:
         spots = await platinum.get_spots(drivers, boot_option)
@@ -71,7 +72,7 @@ async def category_command(
     indent: int | None,
     j: int,
 ) -> None:
-    boot_option = cast(platinum.BootOption, json.load(boot_option_json))
+    boot_option = cast(BootOption, json.load(boot_option_json))
 
     categories = await platinum.get_categories([_open_chrome_driver] * max(1, j), boot_option)
 
@@ -92,7 +93,7 @@ async def database(
     category_json: IO[str],
     output_file: IO[str],
 ) -> None:
-    # boot = cast(platinum.BootOption, json.load(boot_json))
+    # boot = cast(BootOption, json.load(boot_json))
     spots = cast(list[types.Spot], json.load(spot_json))
     # categories = cast(list[types.Category], json.load(category_json))
 

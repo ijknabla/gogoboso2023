@@ -8,6 +8,39 @@ if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
 
+class BootOption(TypedDict):
+    mapCategories: list[MapCategory]
+    stampRallySpots: list[StampRallySpot]
+
+
+class MapCategory(TypedDict):
+    parentCategoryId: CategoryID
+    categoryId: CategoryID
+    shapes: list[Shape]
+    mapCategoryGroup: str
+    categoryName: str
+
+
+class Shape(TypedDict):
+    description: str
+    name: str
+
+
+class StampRallySpot(TypedDict):
+    spotId: SpotID
+    spotTitle: str
+
+
+class Spot(TypedDict):
+    id: SpotID
+    name: str
+    subtitle: NotRequired[str]
+    description: str
+    address: str
+    googlemap_uri: str
+    link_uri: NotRequired[str]
+
+
 class Category(TypedDict):
     id: CategoryID
     parent_id: CategoryID
@@ -20,13 +53,3 @@ class Category(TypedDict):
 class Course(TypedDict):
     name: str
     description: str
-
-
-class Spot(TypedDict):
-    id: SpotID
-    name: str
-    subtitle: NotRequired[str]
-    description: str
-    address: str
-    googlemap_uri: str
-    link_uri: NotRequired[str]
