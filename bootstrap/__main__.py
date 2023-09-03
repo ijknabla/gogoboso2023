@@ -77,10 +77,12 @@ async def category_command(
 ) -> None:
     boot_option = cast(platinum.BootOption, json.load(boot_option_json))
 
-    async with _aopen_chrome_drivers(max(1, j), headless=False) as drivers:
-        categories = await platinum.get_categories(drivers, boot_option)
+    platinum.get_categories2(_open_chrome_driver, boot_option)
 
-    json.dump(categories, output, indent=indent, ensure_ascii=False)
+    # async with _aopen_chrome_drivers(max(1, j), headless=False) as drivers:
+    #     categories = await platinum.get_categories(drivers, boot_option)
+
+    # json.dump(categories, output, indent=indent, ensure_ascii=False)
 
 
 @main.command

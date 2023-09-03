@@ -5,6 +5,7 @@ import re
 from asyncio import gather, get_running_loop
 from collections.abc import Callable, Collection, Coroutine, Generator, Iterable, Mapping
 from concurrent.futures import ThreadPoolExecutor as Executor
+from contextlib import AbstractContextManager
 from functools import partial
 from itertools import chain, count, product
 from operator import itemgetter
@@ -48,20 +49,20 @@ NO_URL_SPOTS = {
 }
 
 CATEGORY_LENGTH = {
-    19016: 24,
-    19018: 17,
-    19025: 24,
+    19016: 486,
+    19018: 13,
+    19025: 473,
     19028: 15,
     19167: 5,
     19168: 4,
-    19697: 24,
+    19697: 97,
     19762: 6,
     19882: 12,
     19883: 17,
     19884: 18,
     19885: 17,
     19886: 19,
-    19887: 24,
+    19887: 31,
     20124: 4,
     20125: 4,
     20126: 4,
@@ -118,6 +119,44 @@ def find_boot_options(driver: WebDriver) -> Generator[BootOption, None, None]:
 
 async def get_spots(drivers: Collection[WebDriver], boot_option: BootOption) -> list[Spot]:
     return sorted(await _get_spots(drivers, boot_option["stampRallySpots"]), key=itemgetter("id"))
+
+
+def get_categories2(
+    open_driver: Callable[[], AbstractContextManager[WebDriver]], boot_option: BootOption
+) -> None:
+    spot_name_to_id = {spot["spotTitle"]: spot["spotId"] for spot in boot_option["stampRallySpots"]}
+
+    for category in boot_option["mapCategories"]:
+        with open_driver() as driver:
+            result = Category(
+                id=category["categoryId"],
+                parent_id=category["parentCategoryId"],
+                name=category["categoryName"],
+                ref=category["mapCategoryGroup"],
+                spot_ids=[],
+            )
+            spot_ids = result["spot_ids"]
+
+            driver.get(f"https://platinumaps.jp/d/gogo-boso?c={result['ref']}&list=1")
+
+            width, height = driver.get_window_size().values()
+
+            for frame in driver.find_elements(by=By.XPATH, value="//iframe"):
+                driver.switch_to.frame(frame)
+
+                for i, new_ids in enumerate(
+                    call_repeat(partial(pickup_spot_ids, driver, spot_name_to_id)), start=1
+                ):
+                    for id in new_ids:
+                        if id not in spot_ids:
+                            spot_ids.append(id)
+
+                    if len(spot_ids) == CATEGORY_LENGTH[result["id"]]:
+                        break
+
+                    driver.set_window_size(width, height * 2**i)
+
+                print(result["id"], len(spot_ids))
 
 
 async def get_categories(drivers: Collection[WebDriver], boot_option: BootOption) -> list[Category]:
@@ -240,13 +279,22 @@ def _get_categories(
     )
     spot_ids = result["spot_ids"]
 
+    driver.set_window_size(945, 23600)
+
     driver.get(f"https://platinumaps.jp/d/gogo-boso?c={result['ref']}&list=1")
+
     for frame in driver.find_elements(by=By.XPATH, value="//iframe"):
         driver.switch_to.frame(frame)
 
-        for new_ids in call_repeat(partial(pickup_spot_ids, driver, spot_name_to_id)):
+        for i, new_ids in enumerate(call_repeat(partial(pickup_spot_ids, driver, spot_name_to_id))):
             for id in new_ids:
-                spot_ids.append(id)
+                if id not in spot_ids:
+                    spot_ids.append(id)
+
+            print(result["id"], len(spot_ids))
+
+            if CATEGORY_LENGTH[result["id"]] == 999:
+                print(result["id"], driver.get_window_size(), len(spot_ids))
 
             if len(spot_ids) == CATEGORY_LENGTH[result["id"]]:
                 break
@@ -268,7 +316,10 @@ def call_repeat(
 
 
 def pickup_spot_ids(driver: WebDriver, spot_name_to_id: Mapping[str, SpotID]) -> list[SpotID]:
-    return [
-        spot_name_to_id[div.text]
-        for div in driver.find_elements(by=By.XPATH, value='//div[@class = "spotlist__itemtitle"]')
-    ]
+    result = []
+    for div in driver.find_elements(by=By.XPATH, value='//div[@class = "spotlist__itemtitle"]'):
+        try:
+            result.append(spot_name_to_id[div.text])
+        except KeyError:
+            print(div.text, "missing")
+    return result
