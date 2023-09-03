@@ -23,3 +23,24 @@ VALUES (?, ?)
         """,
         [(category["id"], re.sub(r"\s+", "", category["name"])) for category in categories],
     )
+
+    cursor.execute(
+        """
+CREATE TABLE course_names
+(
+    category_id INTEGER PRIMARY KEY,
+    cource_name TEXT UNIQUE NOT NULL
+)
+        """
+    )
+    cursor.executemany(
+        """
+INSERT INTO course_names
+VALUES (?, ?)
+        """,
+        [
+            (category["id"], category["course"]["name"])
+            for category in categories
+            if "course" in category
+        ],
+    )

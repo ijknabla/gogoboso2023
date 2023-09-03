@@ -104,6 +104,35 @@ INSERT INTO "category_names" VALUES(20195,'ベイエリア');
 INSERT INTO "category_names" VALUES(20196,'九十九里エリア');
 INSERT INTO "category_names" VALUES(20197,'かずさ・臨海エリア');
 INSERT INTO "category_names" VALUES(20482,'東葛飾コース③');
+CREATE TABLE course_names
+(
+    category_id INTEGER PRIMARY KEY,
+    cource_name TEXT UNIQUE NOT NULL
+);
+INSERT INTO "course_names" VALUES(19167,'唯一無二の景観に感動！　房総のフォトスポットめぐり');
+INSERT INTO "course_names" VALUES(19168,'子どもと一緒に楽しむ体験ツアー');
+INSERT INTO "course_names" VALUES(19762,'市原・君津・木更津　話題のスポットをめぐるコース');
+INSERT INTO "course_names" VALUES(20124,'ベイエリアで和洋の近代建築とアートを堪能');
+INSERT INTO "course_names" VALUES(20125,'船橋・市川・浦安のミュージアムめぐり');
+INSERT INTO "course_names" VALUES(20126,'市川・船橋・千葉の神社仏閣めぐり');
+INSERT INTO "course_names" VALUES(20172,'海だけでない　九十九里の魅力を体験');
+INSERT INTO "course_names" VALUES(20173,'海・山・歴史・文化　九十九里の多彩な魅力を体験');
+INSERT INTO "course_names" VALUES(20174,'九十九里フォトスポット・パワースポットめぐり');
+INSERT INTO "course_names" VALUES(20177,'「北総四都市江戸紀行」神社仏閣めぐり');
+INSERT INTO "course_names" VALUES(20178,'北総で古代のロマンを感じる旅');
+INSERT INTO "course_names" VALUES(20180,'「北総の小江戸」佐原を満喫');
+INSERT INTO "course_names" VALUES(20187,'東葛飾に残る江戸の風情と幕末を感じる旅');
+INSERT INTO "course_names" VALUES(20188,'白樺派の文人たちが愛した手賀沼湖畔を散策');
+INSERT INTO "course_names" VALUES(20189,'外房の海と南房総の里山の自然を味わうドライブコース');
+INSERT INTO "course_names" VALUES(20190,'日蓮聖人ゆかりの地、鴨川の歴史を知る御朱印めぐり');
+INSERT INTO "course_names" VALUES(20191,'南房総の海を満喫！房総最南端の海岸線をめぐる旅');
+INSERT INTO "course_names" VALUES(20192,'＜ちば文化資産＞ダイナミックな景観と、下総の歴史と文化に出会う旅');
+INSERT INTO "course_names" VALUES(20193,'＜ちば文化資産＞東葛飾　江戸・明治の歴史的建築物めぐり');
+INSERT INTO "course_names" VALUES(20194,'＜ちば文化資産＞南房総の波と歴史に魅せられるダイナミッ');
+INSERT INTO "course_names" VALUES(20195,'＜ちば文化資産＞千葉都市モノレールで行く「ちば文化資産」めぐり');
+INSERT INTO "course_names" VALUES(20196,'＜ちば文化資産＞九十九里が誇る日本唯一の建築様式のお寺や歴史の痕跡をたどる');
+INSERT INTO "course_names" VALUES(20197,'＜ちば文化資産＞驚きと感動の連続！かずさ・臨海エリアの絶景スポットをめぐる');
+INSERT INTO "course_names" VALUES(20482,'水運で栄えた江戸川沿いの名所をたどる');
 CREATE TABLE spot_addresses
 (
     spot_id INTEGER PRIMARY KEY,
