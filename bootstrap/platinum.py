@@ -26,6 +26,7 @@ from .types import Category, Course, Spot
 _P = ParamSpec("_P")
 _T1 = TypeVar("_T1")
 _T2 = TypeVar("_T2")
+_T3 = TypeVar("_T3")
 
 INTERVAL = 1.0
 REPEAT = 30
@@ -191,39 +192,34 @@ def _find_boot_options_from_frame(document: _Element) -> Generator[BootOption, N
 def vectorize(
     f: Callable[
         Concatenate[
-            WebDriver,
             _T1,
+            _T2,
             _P,
         ],
-        _T2,
+        _T3,
     ]
-) -> Callable[
-    Concatenate[
-        Collection[WebDriver],
-        Iterable[_T1],
-        _P,
-    ],
-    Coroutine[None, None, list[_T2]],
-]:
+) -> Callable[Concatenate[Collection[_T1], Iterable[_T2], _P,], Coroutine[None, None, list[_T3]],]:
     async def vectorized(
-        drivers: Collection[WebDriver],
-        iterable: Iterable[_T1],
+        collection: Collection[_T1],
+        iterable: Iterable[_T2],
         /,
         *args: _P.args,
         **kwargs: _P.kwargs,
-    ) -> list[_T2]:
+    ) -> list[_T3]:
         loop = get_running_loop()
         iterator = iter(tqdm(iterable))
 
-        with Executor(len(drivers)) as executor:
+        with Executor(len(collection)) as executor:
 
-            async def vectorized(driver: WebDriver) -> list[_T2]:
+            async def vectorized(item_1: _T1) -> list[_T3]:
                 return [
-                    await loop.run_in_executor(executor, partial(f, driver, item, *args, **kwargs))
-                    for item in iterator
+                    await loop.run_in_executor(
+                        executor, partial(f, item_1, item_2, *args, **kwargs)
+                    )
+                    for item_2 in iterator
                 ]
 
-            results = await gather(*(vectorized(driver) for driver in drivers))
+            results = await gather(*(vectorized(driver) for driver in collection))
 
             return list(chain.from_iterable(results))
 
