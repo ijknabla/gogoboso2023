@@ -18,6 +18,13 @@ CREATE TABLE area_names
         _parse_value(sub_area_code["Value"]): sub_area_code["Text"]
         for stamp_rally in boot_option["stampRallies"]
         for sub_area_code in stamp_rally["subAreaCodes"]
+    } | {
+        121011: "中央区",
+        121029: "花見川区",
+        121037: "稲毛区",
+        121045: "若葉区",
+        121053: "緑区",
+        121061: "美浜区",
     }
     cursor.executemany(
         """
