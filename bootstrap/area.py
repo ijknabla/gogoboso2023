@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 from sqlite3 import Cursor
 
@@ -14,7 +16,17 @@ CREATE TABLE area_names
 )
         """
     )
-    values = {
+    cursor.executemany(
+        """
+INSERT INTO area_names
+VALUES (?, ?)
+        """,
+        sorted(get_areas(boot_option).items()),
+    )
+
+
+def get_areas(boot_option: BootOption) -> dict[int, str]:
+    return {
         _parse_value(sub_area_code["Value"]): sub_area_code["Text"].replace("ヶ", "ケ")
         for stamp_rally in boot_option["stampRallies"]
         for sub_area_code in stamp_rally["subAreaCodes"]
@@ -26,13 +38,6 @@ CREATE TABLE area_names
         121053: "緑区",
         121061: "美浜区",
     }
-    cursor.executemany(
-        """
-INSERT INTO area_names
-VALUES (?, ?)
-        """,
-        sorted(values.items()),
-    )
 
 
 def _parse_value(value: str) -> int:
