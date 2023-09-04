@@ -1,11 +1,17 @@
 from __future__ import annotations
 
+import re
 from sqlite3 import Cursor
 
-from .types import Spot
+from .area import get_areas
+from .types import BootOption, Spot
 
 
-def create_and_insert(cursor: Cursor, spots: list[Spot]) -> None:
+def create_and_insert(
+    cursor: Cursor,
+    boot_option: BootOption,
+    spots: list[Spot],
+) -> None:
     cursor.execute(
         """
 CREATE TABLE spot_names
@@ -58,3 +64,33 @@ VALUES (?, ?)
         """,
         [(spot["id"], spot["address"]) for spot in spots],
     )
+
+    areas = {k: v for v, k in get_areas(boot_option).items() if k not in {"千葉市"}}
+    pattern = re.compile("|".join(areas))
+
+    cursor.execute(
+        """
+CREATE TABLE spot_areas
+(
+    spot_id INTEGER,
+    area_index INTEGER,
+    area_id INTEGER NOT NULL,
+    PRIMARY KEY(spot_id, area_index)
+)
+        """
+    )
+    cursor.executemany(
+        """
+INSERT INTO spot_areas
+VALUES (?, ?, ?)
+        """,
+        [
+            (spot["id"], index, areas[area])
+            for spot in spots
+            for index, area in enumerate(pattern.findall(_normalize_address(spot["address"])))
+        ],
+    )
+
+
+def _normalize_address(address: str) -> str:
+    return address.replace("ヶ", "ケ").replace("舘", "館")

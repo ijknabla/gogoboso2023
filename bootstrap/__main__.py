@@ -100,7 +100,7 @@ async def database(
     with connect(":memory:") as connection:
         cursor = connection.cursor()
         area.create_and_insert(cursor, boot)
-        spot.create_and_insert(cursor, spots)
+        spot.create_and_insert(cursor, boot, spots)
         category.create_and_insert(cursor, categories)
 
         for sql in connection.iterdump():
