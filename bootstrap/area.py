@@ -15,7 +15,7 @@ CREATE TABLE area_names
         """
     )
     values = {
-        _parse_value(sub_area_code["Value"]): sub_area_code["Text"]
+        _parse_value(sub_area_code["Value"]): sub_area_code["Text"].replace("ヶ", "ケ")
         for stamp_rally in boot_option["stampRallies"]
         for sub_area_code in stamp_rally["subAreaCodes"]
     } | {
