@@ -67,3 +67,21 @@ VALUES (?, ?, ?)
             for index, id in enumerate(category["spot_ids"])
         ],
     )
+
+    cursor.execute(
+        """
+CREATE TABLE category_tree
+(
+    edge_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    parent_id INTEGER NOT NULL,
+    child_id INTEGER NOT NULL
+)
+        """
+    )
+    cursor.executemany(
+        """
+INSERT INTO category_tree(parent_id, child_id)
+VALUES (?, ?)
+        """,
+        [(category["parent_id"], category["id"]) for category in categories],
+    )

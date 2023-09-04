@@ -1462,6 +1462,47 @@ INSERT INTO "category_spots" VALUES(20482,1,208182);
 INSERT INTO "category_spots" VALUES(20482,2,208227);
 INSERT INTO "category_spots" VALUES(20482,3,208188);
 INSERT INTO "category_spots" VALUES(20482,4,208255);
+CREATE TABLE category_tree
+(
+    edge_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    parent_id INTEGER NOT NULL,
+    child_id INTEGER NOT NULL
+);
+INSERT INTO "category_tree" VALUES(1,0,19016);
+INSERT INTO "category_tree" VALUES(2,0,19018);
+INSERT INTO "category_tree" VALUES(3,0,19025);
+INSERT INTO "category_tree" VALUES(4,0,19028);
+INSERT INTO "category_tree" VALUES(5,19885,19167);
+INSERT INTO "category_tree" VALUES(6,19885,19168);
+INSERT INTO "category_tree" VALUES(7,0,19697);
+INSERT INTO "category_tree" VALUES(8,19885,19762);
+INSERT INTO "category_tree" VALUES(9,0,19882);
+INSERT INTO "category_tree" VALUES(10,0,19883);
+INSERT INTO "category_tree" VALUES(11,0,19884);
+INSERT INTO "category_tree" VALUES(12,0,19885);
+INSERT INTO "category_tree" VALUES(13,0,19886);
+INSERT INTO "category_tree" VALUES(14,0,19887);
+INSERT INTO "category_tree" VALUES(15,19882,20124);
+INSERT INTO "category_tree" VALUES(16,19882,20125);
+INSERT INTO "category_tree" VALUES(17,19882,20126);
+INSERT INTO "category_tree" VALUES(18,19884,20172);
+INSERT INTO "category_tree" VALUES(19,19884,20173);
+INSERT INTO "category_tree" VALUES(20,19884,20174);
+INSERT INTO "category_tree" VALUES(21,19883,20177);
+INSERT INTO "category_tree" VALUES(22,19883,20178);
+INSERT INTO "category_tree" VALUES(23,19883,20180);
+INSERT INTO "category_tree" VALUES(24,19028,20187);
+INSERT INTO "category_tree" VALUES(25,19028,20188);
+INSERT INTO "category_tree" VALUES(26,19886,20189);
+INSERT INTO "category_tree" VALUES(27,19886,20190);
+INSERT INTO "category_tree" VALUES(28,19886,20191);
+INSERT INTO "category_tree" VALUES(29,19887,20192);
+INSERT INTO "category_tree" VALUES(30,19887,20193);
+INSERT INTO "category_tree" VALUES(31,19887,20194);
+INSERT INTO "category_tree" VALUES(32,19887,20195);
+INSERT INTO "category_tree" VALUES(33,19887,20196);
+INSERT INTO "category_tree" VALUES(34,19887,20197);
+INSERT INTO "category_tree" VALUES(35,19028,20482);
 CREATE TABLE course_names
 (
     category_id INTEGER PRIMARY KEY,
@@ -3533,4 +3574,6 @@ INSERT INTO "spot_uris" VALUES(210060,'https://www.town.yokoshibahikari.chiba.jp
 INSERT INTO "spot_uris" VALUES(210061,'https://www.town.yokoshibahikari.chiba.jp/soshiki/14/1395.html#a02');
 INSERT INTO "spot_uris" VALUES(210062,'https://www.town.yokoshibahikari.chiba.jp/soshiki/14/1395.html#a08');
 INSERT INTO "spot_uris" VALUES(210663,'https://twitter.com/harumi_suijinja');
+DELETE FROM "sqlite_sequence";
+INSERT INTO "sqlite_sequence" VALUES('category_tree',35);
 COMMIT;
