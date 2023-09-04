@@ -36,7 +36,7 @@ INSERT INTO "area_names" VALUES(122254,'君津市');
 INSERT INTO "area_names" VALUES(122262,'富津市');
 INSERT INTO "area_names" VALUES(122271,'浦安市');
 INSERT INTO "area_names" VALUES(122289,'四街道市');
-INSERT INTO "area_names" VALUES(122297,'袖ヶ浦市');
+INSERT INTO "area_names" VALUES(122297,'袖ケ浦市');
 INSERT INTO "area_names" VALUES(122301,'八街市');
 INSERT INTO "area_names" VALUES(122319,'印西市');
 INSERT INTO "area_names" VALUES(122327,'白井市');
