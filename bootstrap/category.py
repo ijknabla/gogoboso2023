@@ -44,3 +44,26 @@ VALUES (?, ?)
             if "course" in category
         ],
     )
+
+    cursor.execute(
+        """
+CREATE TABLE category_spots
+(
+    category_id INTEGER,
+    spot_index INTEGER,
+    spot_id INTEGER NOT NULL,
+    PRIMARY KEY(category_id, spot_index)
+)
+        """
+    )
+    cursor.executemany(
+        """
+INSERT INTO category_spots
+VALUES (?, ?, ?)
+        """,
+        [
+            (category["id"], index, id)
+            for category in categories
+            for index, id in enumerate(category["spot_ids"])
+        ],
+    )
