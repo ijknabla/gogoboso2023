@@ -14,59 +14,6 @@ def create_and_insert(
 ) -> None:
     cursor.execute(
         """
-CREATE TABLE spot_googlemap_uris
-(
-    spot_id INTEGER PRIMARY KEY,
-    spot_googlemap_uri TEXT NOT NULL
-)
-        """
-    )
-    cursor.executemany(
-        """
-INSERT INTO spot_googlemap_uris
-VALUES (?, ?)
-        """,
-        [(spot["id"], spot["googlemap_uri"]) for spot in spots],
-    )
-
-    cursor.execute(
-        """
-CREATE TABLE spot_link_uris
-(
-    spot_id INTEGER PRIMARY KEY,
-    spot_link_uri TEXT NOT NULL
-)
-        """
-    )
-    cursor.executemany(
-        """
-INSERT INTO spot_link_uris
-VALUES (?, ?)
-        """,
-        [(spot["id"], spot["link_uri"]) for spot in spots if "link_uri" in spot],
-    )
-
-    cursor.execute(
-        """
-CREATE TABLE spot_names
-(
-    spot_id INTEGER,
-    notation_id INTEGER,
-    spot_name TEXT NOT NULL,
-    PRIMARY KEY(spot_id, notation_id)
-)
-        """
-    )
-    cursor.executemany(
-        """
-INSERT INTO spot_names
-VALUES (?, ?, ?)
-        """,
-        [(spot["id"], 0, spot["name"]) for spot in spots],
-    )
-
-    cursor.execute(
-        """
 CREATE TABLE spot_addresses
 (
     spot_id INTEGER PRIMARY KEY,
@@ -82,9 +29,6 @@ VALUES (?, ?)
         [(spot["id"], spot["address"]) for spot in spots],
     )
 
-    areas = {k: v for v, k in get_areas(boot_option).items() if k not in {"千葉市"}}
-    pattern = re.compile("|".join(areas))
-
     cursor.execute(
         """
 CREATE TABLE spot_areas
@@ -96,6 +40,9 @@ CREATE TABLE spot_areas
 )
         """
     )
+
+    areas = {k: v for v, k in get_areas(boot_option).items() if k not in {"千葉市"}}
+    pattern = re.compile("|".join(areas))
     cursor.executemany(
         """
 INSERT INTO spot_areas
@@ -106,6 +53,23 @@ VALUES (?, ?, ?)
             for spot in spots
             for index, area in enumerate(pattern.findall(_normalize_address(spot["address"])))
         ],
+    )
+
+    cursor.execute(
+        """
+CREATE TABLE spot_googlemap_uris
+(
+    spot_id INTEGER PRIMARY KEY,
+    spot_googlemap_uri TEXT NOT NULL
+)
+        """
+    )
+    cursor.executemany(
+        """
+INSERT INTO spot_googlemap_uris
+VALUES (?, ?)
+        """,
+        [(spot["id"], spot["googlemap_uri"]) for spot in spots],
     )
 
     cursor.execute(
@@ -127,6 +91,23 @@ VALUES (?, ?)
 
     cursor.execute(
         """
+CREATE TABLE spot_link_uris
+(
+    spot_id INTEGER PRIMARY KEY,
+    spot_link_uri TEXT NOT NULL
+)
+        """
+    )
+    cursor.executemany(
+        """
+INSERT INTO spot_link_uris
+VALUES (?, ?)
+        """,
+        [(spot["id"], spot["link_uri"]) for spot in spots if "link_uri" in spot],
+    )
+
+    cursor.execute(
+        """
 CREATE TABLE spot_longitudes
 (
     spot_id INTEGER PRIMARY KEY,
@@ -140,6 +121,25 @@ INSERT INTO spot_longitudes
 VALUES (?, ?)
         """,
         [(spot["spotId"], spot["spotLng"]) for spot in boot_option["stampRallySpots"]],
+    )
+
+    cursor.execute(
+        """
+CREATE TABLE spot_names
+(
+    spot_id INTEGER,
+    notation_id INTEGER,
+    spot_name TEXT NOT NULL,
+    PRIMARY KEY(spot_id, notation_id)
+)
+        """
+    )
+    cursor.executemany(
+        """
+INSERT INTO spot_names
+VALUES (?, ?, ?)
+        """,
+        [(spot["id"], 0, spot["name"]) for spot in spots],
     )
 
 
