@@ -5355,6 +5355,69 @@ INSERT INTO "spot_names" VALUES(213161,'千葉県誕生150周年記念　３市�
 INSERT INTO "spot_names" VALUES(213162,'千葉県誕生150周年記念　３市周遊デジタルスタンプラリー');
 INSERT INTO "spot_names" VALUES(213163,'千葉県誕生150周年記念　３市周遊デジタルスタンプラリー');
 INSERT INTO "spot_names" VALUES(213164,'千葉県誕生150周年記念　桃園市国楽団コンサート');
+CREATE TABLE spot_periods
+(
+    spot_id INTEGER,
+    spot_period_index INTEGER NOT NULL,
+    spot_period_begin DATE NOT NULL,
+    spot_period_end DATE NOT NULL,
+    PRIMARY KEY(spot_id, spot_period_index)
+);
+INSERT INTO "spot_periods" VALUES(207134,0,'2023-09-16','2024-03-31');
+INSERT INTO "spot_periods" VALUES(207135,0,'2023-07-29','2023-10-09');
+INSERT INTO "spot_periods" VALUES(207136,0,'2023-09-16','2023-09-17');
+INSERT INTO "spot_periods" VALUES(207137,0,'2023-09-17','2023-09-17');
+INSERT INTO "spot_periods" VALUES(207137,1,'2023-11-26','2023-11-26');
+INSERT INTO "spot_periods" VALUES(207138,0,'2023-09-12','2023-10-20');
+INSERT INTO "spot_periods" VALUES(207139,0,'2023-09-17','2023-09-17');
+INSERT INTO "spot_periods" VALUES(207140,0,'2023-09-12','2023-11-12');
+INSERT INTO "spot_periods" VALUES(207141,0,'2023-09-30','2023-09-30');
+INSERT INTO "spot_periods" VALUES(207142,0,'2023-09-30','2023-09-30');
+INSERT INTO "spot_periods" VALUES(207143,0,'2023-09-30','2023-09-30');
+INSERT INTO "spot_periods" VALUES(207144,0,'2023-09-14','2023-09-20');
+INSERT INTO "spot_periods" VALUES(207145,0,'2023-09-29','2023-10-09');
+INSERT INTO "spot_periods" VALUES(207146,0,'2023-10-13','2023-10-19');
+INSERT INTO "spot_periods" VALUES(207147,0,'2023-10-25','2023-10-31');
+INSERT INTO "spot_periods" VALUES(207148,0,'2023-11-14','2023-11-20');
+INSERT INTO "spot_periods" VALUES(207149,0,'2023-07-15','2023-09-18');
+INSERT INTO "spot_periods" VALUES(207150,0,'2023-07-19','2023-09-18');
+INSERT INTO "spot_periods" VALUES(212661,0,'2023-10-28','2023-10-29');
+INSERT INTO "spot_periods" VALUES(212662,0,'2023-10-28','2023-11-12');
+INSERT INTO "spot_periods" VALUES(212663,0,'2023-10-28','2023-12-24');
+INSERT INTO "spot_periods" VALUES(212664,0,'2023-11-25','2024-06-16');
+INSERT INTO "spot_periods" VALUES(212665,0,'2023-11-03','2023-11-03');
+INSERT INTO "spot_periods" VALUES(212666,0,'2023-11-23','2023-11-23');
+INSERT INTO "spot_periods" VALUES(212667,0,'2023-10-28','2023-10-28');
+INSERT INTO "spot_periods" VALUES(212668,0,'2023-11-04','2023-11-04');
+INSERT INTO "spot_periods" VALUES(212669,0,'2023-11-26','2023-11-26');
+INSERT INTO "spot_periods" VALUES(212670,0,'2023-01-14','2023-01-14');
+INSERT INTO "spot_periods" VALUES(212670,1,'2023-11-25','2023-11-25');
+INSERT INTO "spot_periods" VALUES(212670,2,'2023-12-23','2023-12-23');
+INSERT INTO "spot_periods" VALUES(212671,0,'2023-10-08','2023-10-08');
+INSERT INTO "spot_periods" VALUES(212672,0,'2023-11-23','2023-11-23');
+INSERT INTO "spot_periods" VALUES(212673,0,'2023-10-15','2023-10-15');
+INSERT INTO "spot_periods" VALUES(212674,0,'2023-10-08','2023-10-08');
+INSERT INTO "spot_periods" VALUES(212675,0,'2023-11-23','2023-11-23');
+INSERT INTO "spot_periods" VALUES(212676,0,'2023-10-08','2023-10-08');
+INSERT INTO "spot_periods" VALUES(212677,0,'2023-11-25','2023-11-25');
+INSERT INTO "spot_periods" VALUES(212678,0,'2023-11-03','2023-11-03');
+INSERT INTO "spot_periods" VALUES(212679,0,'2023-11-03','2023-11-03');
+INSERT INTO "spot_periods" VALUES(212680,0,'2023-10-08','2023-10-08');
+INSERT INTO "spot_periods" VALUES(212681,0,'2023-10-07','2023-10-07');
+INSERT INTO "spot_periods" VALUES(212682,0,'2023-10-27','2024-01-21');
+INSERT INTO "spot_periods" VALUES(212683,0,'2023-10-14','2023-12-03');
+INSERT INTO "spot_periods" VALUES(212684,0,'2023-09-29','2023-11-26');
+INSERT INTO "spot_periods" VALUES(212685,0,'2023-09-23','2023-11-12');
+INSERT INTO "spot_periods" VALUES(213156,0,'2023-10-16','2023-10-22');
+INSERT INTO "spot_periods" VALUES(213157,0,'2023-11-26','2023-11-26');
+INSERT INTO "spot_periods" VALUES(213158,0,'2023-10-21','2023-10-28');
+INSERT INTO "spot_periods" VALUES(213159,0,'2023-10-21','2023-10-21');
+INSERT INTO "spot_periods" VALUES(213159,1,'2023-10-22','2023-10-22');
+INSERT INTO "spot_periods" VALUES(213160,0,'2023-11-12','2023-11-12');
+INSERT INTO "spot_periods" VALUES(213161,0,'2023-11-01','2024-02-29');
+INSERT INTO "spot_periods" VALUES(213162,0,'2023-11-01','2024-02-29');
+INSERT INTO "spot_periods" VALUES(213163,0,'2023-11-01','2024-02-29');
+INSERT INTO "spot_periods" VALUES(213164,0,'2023-10-02','2023-10-02');
 CREATE TABLE spot_subtitles
 (
     spot_id INTEGER PRIMARY KEY,

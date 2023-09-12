@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Generator, Iterable
+from datetime import date
 from sqlite3 import Cursor
 from typing import TypeVar
 
@@ -163,6 +164,31 @@ VALUES (?, ?)
         [(spot["id"], spot["subtitle"]) for spot in spots if "subtitle" in spot],
     )
 
+    cursor.execute(
+        """
+CREATE TABLE spot_periods
+(
+    spot_id INTEGER,
+    spot_period_index INTEGER NOT NULL,
+    spot_period_begin DATE NOT NULL,
+    spot_period_end DATE NOT NULL,
+    PRIMARY KEY(spot_id, spot_period_index)
+)
+        """
+    )
+    cursor.executemany(
+        """
+INSERT INTO spot_periods
+VALUES (?, ?, ?, ?)
+        """,
+        [
+            (spot["id"], index, begin, end)
+            for spot in spots
+            if "subtitle" in spot and "開催期間" in spot["subtitle"]
+            for index, (begin, end) in enumerate(sorted(iter_unique(iter_period(spot["subtitle"]))))
+        ],
+    )
+
 
 def _normalize_address(address: str) -> str:
     return address.replace("ヶ", "ケ").replace("舘", "館").replace("印西市中央区", "印西市中央")
@@ -176,3 +202,53 @@ def iter_unique(iterable: Iterable[_T]) -> Generator[_T, None, None]:
                 yield item
         finally:
             already.add(item)
+
+
+def iter_period(subtitle: str) -> Generator[tuple[date, date], None, None]:
+    begin = None
+
+    year = "2023"
+
+    for matched in re.finditer(
+        r"(?P<is_end>～)?((?P<year>\d+)年)?((?P<month>\d+)月)?((?P<day>\d+)日)?", subtitle
+    ):
+        match matched.group():
+            case "":
+                continue
+            case "～":
+                continue
+        match matched.group("year"):
+            case None:
+                ...
+            case year:
+                ...
+
+        match matched.group("month"):
+            case None:
+                ...
+            case month:
+                ...
+
+        if (year, month) == ("2024", "3"):
+            year, month, day = "2024", "3", "31"
+        else:
+            match matched.group("day"):
+                case None:
+                    raise NotImplementedError()
+                case day:
+                    ...
+
+        current = date(int(year), int(month), int(day))
+
+        match matched.group("is_end"):
+            case None:
+                if begin is not None:
+                    yield begin, begin
+                begin = current
+            case _:
+                assert begin is not None
+                yield begin, current
+                begin = None
+
+    if begin is not None:
+        yield begin, begin
