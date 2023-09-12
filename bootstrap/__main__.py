@@ -64,7 +64,7 @@ async def spot_command(
 @run_decorator
 @click.argument("boot-option-json", type=click.File("r", encoding="utf-8"))
 @click.option("-o", "--output", type=click.File("w", encoding="utf-8"), default=sys.stdout)
-@click.option("-j", type=int, default=2)
+@click.option("-j", type=int, default=1)
 @click.option("--indent", type=int, default=2)
 async def category_command(
     boot_option_json: IO[str],
