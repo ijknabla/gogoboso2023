@@ -14,6 +14,40 @@ def create_and_insert(
 ) -> None:
     cursor.execute(
         """
+CREATE TABLE spot_googlemap_uris
+(
+    spot_id INTEGER PRIMARY KEY,
+    spot_googlemap_uri TEXT NOT NULL
+)
+        """
+    )
+    cursor.executemany(
+        """
+INSERT INTO spot_googlemap_uris
+VALUES (?, ?)
+        """,
+        [(spot["id"], spot["googlemap_uri"]) for spot in spots],
+    )
+
+    cursor.execute(
+        """
+CREATE TABLE spot_link_uris
+(
+    spot_id INTEGER PRIMARY KEY,
+    spot_link_uri TEXT NOT NULL
+)
+        """
+    )
+    cursor.executemany(
+        """
+INSERT INTO spot_link_uris
+VALUES (?, ?)
+        """,
+        [(spot["id"], spot["link_uri"]) for spot in spots if "link_uri" in spot],
+    )
+
+    cursor.execute(
+        """
 CREATE TABLE spot_names
 (
     spot_id INTEGER,
@@ -29,23 +63,6 @@ INSERT INTO spot_names
 VALUES (?, ?, ?)
         """,
         [(spot["id"], 0, spot["name"]) for spot in spots],
-    )
-
-    cursor.execute(
-        """
-CREATE TABLE spot_uris
-(
-    spot_id INTEGER PRIMARY KEY,
-    spot_uri TEXT NOT NULL
-)
-        """
-    )
-    cursor.executemany(
-        """
-INSERT INTO spot_uris
-VALUES (?, ?)
-        """,
-        [(spot["id"], spot["link_uri"]) for spot in spots if "link_uri" in spot],
     )
 
     cursor.execute(
