@@ -133,19 +133,17 @@ VALUES (?, ?)
         """
 CREATE TABLE spot_names
 (
-    spot_id INTEGER,
-    notation_id INTEGER,
-    spot_name TEXT NOT NULL,
-    PRIMARY KEY(spot_id, notation_id)
+    spot_id INTEGER PRIMARY KEY,
+    spot_name TEXT NOT NULL
 )
         """
     )
     cursor.executemany(
         """
 INSERT INTO spot_names
-VALUES (?, ?, ?)
+VALUES (?, ?)
         """,
-        [(spot["id"], 0, spot["name"]) for spot in spots],
+        [(spot["id"], spot["name"]) for spot in spots],
     )
 
     cursor.execute(
