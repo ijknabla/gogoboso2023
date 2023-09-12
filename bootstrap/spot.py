@@ -142,6 +142,23 @@ VALUES (?, ?, ?)
         [(spot["id"], 0, spot["name"]) for spot in spots],
     )
 
+    cursor.execute(
+        """
+CREATE TABLE spot_subtitles
+(
+    spot_id INTEGER PRIMARY KEY,
+    spot_subtitle TEXT NOT NULL
+)
+        """
+    )
+    cursor.executemany(
+        """
+INSERT INTO spot_subtitles
+VALUES (?, ?)
+        """,
+        [(spot["id"], spot["subtitle"]) for spot in spots if "subtitle" in spot],
+    )
+
 
 def _normalize_address(address: str) -> str:
     return address.replace("ヶ", "ケ").replace("舘", "館")
