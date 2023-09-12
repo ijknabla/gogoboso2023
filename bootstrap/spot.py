@@ -1,10 +1,14 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Generator, Iterable
 from sqlite3 import Cursor
+from typing import TypeVar
 
 from .area import get_areas
 from .types import BootOption, Spot
+
+_T = TypeVar("_T")
 
 
 def create_and_insert(
@@ -51,7 +55,9 @@ VALUES (?, ?, ?)
         [
             (spot["id"], index, areas[area])
             for spot in spots
-            for index, area in enumerate(pattern.findall(_normalize_address(spot["address"])))
+            for index, area in enumerate(
+                iter_unique(pattern.findall(_normalize_address(spot["address"])))
+            )
         ],
     )
 
@@ -162,3 +168,13 @@ VALUES (?, ?)
 
 def _normalize_address(address: str) -> str:
     return address.replace("ヶ", "ケ").replace("舘", "館")
+
+
+def iter_unique(iterable: Iterable[_T]) -> Generator[_T, None, None]:
+    already = set[_T]()
+    for item in iterable:
+        try:
+            if item not in already:
+                yield item
+        finally:
+            already.add(item)
