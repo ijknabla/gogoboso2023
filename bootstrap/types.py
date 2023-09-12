@@ -37,6 +37,8 @@ class SubAreaCode(TypedDict):
 
 
 class StampRallySpot(TypedDict):
+    spotLng: float
+    spotLat: float
     spotId: SpotID
     spotTitle: str
 

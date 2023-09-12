@@ -108,6 +108,40 @@ VALUES (?, ?, ?)
         ],
     )
 
+    cursor.execute(
+        """
+CREATE TABLE spot_latitudes
+(
+    spot_id INTEGER PRIMARY KEY,
+    spot_latitude REAL NOT NULL
+)
+        """
+    )
+    cursor.executemany(
+        """
+INSERT INTO spot_latitudes
+VALUES (?, ?)
+        """,
+        [(spot["spotId"], spot["spotLat"]) for spot in boot_option["stampRallySpots"]],
+    )
+
+    cursor.execute(
+        """
+CREATE TABLE spot_longitudes
+(
+    spot_id INTEGER PRIMARY KEY,
+    spot_longitude REAL NOT NULL
+)
+        """
+    )
+    cursor.executemany(
+        """
+INSERT INTO spot_longitudes
+VALUES (?, ?)
+        """,
+        [(spot["spotId"], spot["spotLng"]) for spot in boot_option["stampRallySpots"]],
+    )
+
 
 def _normalize_address(address: str) -> str:
     return address.replace("ヶ", "ケ").replace("舘", "館")
