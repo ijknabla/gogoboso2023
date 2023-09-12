@@ -167,7 +167,7 @@ VALUES (?, ?)
 
 
 def _normalize_address(address: str) -> str:
-    return address.replace("ヶ", "ケ").replace("舘", "館")
+    return address.replace("ヶ", "ケ").replace("舘", "館").replace("印西市中央区", "印西市中央")
 
 
 def iter_unique(iterable: Iterable[_T]) -> Generator[_T, None, None]:
