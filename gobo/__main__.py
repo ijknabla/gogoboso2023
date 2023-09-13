@@ -31,6 +31,7 @@ def main() -> None:
 class SpotColumn(Enum):
     ID = id = "A"
     名前 = name = "B"
+    市町村 = area = "C"
 
     def index(self, i: int) -> str:
         return f"{self.value}{i}"
@@ -56,8 +57,9 @@ async def excel(
     for i, (id, name) in enumerate(db.spot_names.items(), start=2):
         spot_db_sheet[SpotColumn.id.index(i)] = id
         spot_db_sheet[SpotColumn.name.index(i)] = name
-
-    print(db.spot_names)
+        spot_db_sheet[SpotColumn.area.index(i)] = ";".join(
+            db.area_names[area_id] for area_id in db.spot_areas[id]
+        )
 
     # spot_sheet = wb.create_sheet("スポット")
     # spot_sheet[f"{CLEARED}1"] = "達成"

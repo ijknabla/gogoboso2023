@@ -1,6 +1,7 @@
 from sqlite3 import Connection
+from typing import DefaultDict
 
-from ..types import URI, Area, SpotID
+from ..types import URI, AreaID, SpotID
 
 
 class Database:
@@ -34,18 +35,20 @@ WHERE spot_id = ?
             case _:
                 raise ValueError(id)
 
-    def spot_area(self, id: SpotID) -> Area:
+    @property
+    def spot_areas(self) -> dict[SpotID, list[AreaID]]:
         cursor = self.connection.cursor()
         cursor.execute(
             """
-SELECT area_id
+SELECT spot_id, area_id
 FROM spot_areas
-WHERE spot_id = ?
-            """,
-            (id,),
+ORDER BY spot_id, area_index
+            """
         )
-        match cursor.fetchone():
-            case (area_id,):
-                return Area(area_id)
-            case _:
-                raise ValueError(id)
+
+        result = DefaultDict[SpotID, list[AreaID]](list)
+
+        for spot_id, area_id in cursor.fetchall():
+            result[spot_id].append(area_id)
+
+        return dict(result)
