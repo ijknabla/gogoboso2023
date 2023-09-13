@@ -1,38 +1,22 @@
 from sqlite3 import Connection
 
-from ..types import URI, Area, Notation, SpotID
+from ..types import URI, Area, SpotID
 
 
 class Database:
     connection: Connection
 
     @property
-    def spots(self) -> list[SpotID]:
+    def spot_names(self) -> dict[SpotID, str]:
         cursor = self.connection.cursor()
         cursor.execute(
             """
-SELECT DISTINCT spot_id
+SELECT *
 FROM spot_names
 ORDER BY spot_id
             """
         )
-        return [SpotID(id) for id, in cursor.fetchall()]
-
-    def spot_name(self, id: SpotID, notation: Notation = Notation.default) -> str:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-SELECT spot_name
-FROM spot_names
-WHERE spot_id = ? AND notation_id = ?
-            """,
-            (id, notation.value),
-        )
-        match cursor.fetchone():
-            case (name,):
-                return name
-            case _:
-                raise ValueError(id, notation)
+        return dict(cursor.fetchall())
 
     def spot_uri(self, id: SpotID) -> URI:
         cursor = self.connection.cursor()

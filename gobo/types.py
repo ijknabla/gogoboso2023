@@ -11,14 +11,7 @@ class Area(Enum):
     かずさ_臨海 = 6
 
 
+AreaID = NewType("AreaID", int)
 CategoryID = NewType("CategoryID", int)
-MunicipalityID = NewType("MunicipalityID", int)
-
-
-class Notation(Enum):
-    default = 0
-    hiragana = 1
-
-
 SpotID = NewType("SpotID", int)
 URI = NewType("URI", str)
