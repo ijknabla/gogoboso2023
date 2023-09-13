@@ -318,7 +318,7 @@ def _get_category(
                 if len(spot_ids) >= expected_spot_ids_length:
                     break
 
-                driver.set_window_size(width, height * 2**i)
+                driver.set_window_size(width, 65536)
                 sleep(interval)
 
             if expected_spot_ids_length != len(spot_ids):
