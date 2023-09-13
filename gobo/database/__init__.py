@@ -5,11 +5,11 @@ from sqlite3 import Connection, connect
 
 from pkg_resources import resource_string
 
-from . import area, spot
+from . import area, category, spot
 
 
 @dataclass(frozen=True)
-class Database(area.Database, spot.Database):
+class Database(area.Database, category.Database, spot.Database):
     connection: Connection
 
     def close(self) -> None:

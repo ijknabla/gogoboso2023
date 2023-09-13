@@ -50,15 +50,18 @@ async def excel(
 ) -> None:
     wb = Workbook()
 
+    (category,) = db.find_category_by_name("デジタルポイントラリー")
+    spot_order = db.category_spots[category]
+
     spot_db_sheet = wb.create_sheet("スポットデータベース")
     for col in SpotColumn:
         spot_db_sheet[col.index(1)] = col.name
 
-    for i, (id, name) in enumerate(db.spot_names.items(), start=2):
-        spot_db_sheet[SpotColumn.id.index(i)] = id
-        spot_db_sheet[SpotColumn.name.index(i)] = name
-        spot_db_sheet[SpotColumn.area.index(i)] = ";".join(
-            db.area_names[area_id] for area_id in db.spot_areas[id]
+    for row, spot_id in enumerate(spot_order, start=2):
+        spot_db_sheet[SpotColumn.id.index(row)] = spot_id
+        spot_db_sheet[SpotColumn.name.index(row)] = db.spot_names[spot_id]
+        spot_db_sheet[SpotColumn.area.index(row)] = ";".join(
+            db.area_names[area_id] for area_id in db.spot_areas[spot_id]
         )
 
     # spot_sheet = wb.create_sheet("スポット")
