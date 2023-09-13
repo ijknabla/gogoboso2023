@@ -12,6 +12,7 @@ gobo = "gobo.__main__:main"
 python = "^3.10"
 click = "^8.1.7"
 openpyxl = "^3.1.2"
+bidict = "^0.22.1"
 
 
 [tool.poetry.group.lint.dependencies]
